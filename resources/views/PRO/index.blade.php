@@ -101,7 +101,7 @@
                                 <td><span style="font-size: 15px;">{{ $req->pro }}</span></td>
                                 <td><span style="font-size: 10px;">{{ $req->material }}</span></td>
                                 <td><span style="font-size: 5px;">{{ $req->color_desc }}</span></td>
-                                <td><span style="font-size: 10px;">{{ $req->location }}</span></td>
+                                <td><span style="font-size: 10px;">{{ $req->location_all }}</span></td>
                                 
                                 <td><span style="font-size: 10px;">{{ $req->segment }}</span></td>
                                 <td><span style="font-size: 10px;">{{ $req->brand }}</span></td>

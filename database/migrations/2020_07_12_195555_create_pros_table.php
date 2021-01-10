@@ -65,7 +65,11 @@ class CreateProsTable extends Migration {
 
 			$table->string('tpp_shipments')->nullable();
 			$table->string('tpp_wastage')->nullable();
+
+			$table->string('skeda')->nullable();
+			$table->string('location_all')->nullable();
 		});
+
 	}
 
 	/**

@@ -227,7 +227,7 @@ class proController extends Controller {
 				// UPDATE FROM COOIS
 				$coois = DB::connection('sqlsrv3')->select(DB::raw("
 					SELECT 
-						DISTINCT wc 
+						DISTINCT wc, activity
 					FROM [trebovanje].[dbo].[sap_coois]
 					WHERE po like '%".$data_local[0]->pro."%' "));
 				// var_dump($data_local[0]->pro);
@@ -248,15 +248,54 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
-						} elseif ($coois[$a]->wc == 'WCPS') {
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
-						}
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
 					}
 				} else {
 					$q_coois = "no info";
 				}
 				if ($q_coois == '') {
 					$q_coois = "no info";
+				}
+
+				// UPDATE FROM COOIS ALL
+				$coois_all = DB::connection('sqlsrv3')->select(DB::raw("
+					SELECT 
+						DISTINCT wc, activity
+					FROM [trebovanje].[dbo].[sap_coois_all]
+					WHERE po like '%".$data_local[0]->pro."%' "));
+				// var_dump($data_local[0]->pro);
+				// var_dump($coois);
+
+				if (isset($coois_all[0]->wc)){
+					// dd($coois[0]->wc);
+						 
+					$q_coois_all = '';
+					for ($a=0; $a < count($coois_all); $a++) { 
+
+						// var_dump($coois[$a]->wc);
+						if ($coois_all[$a]->wc == 'WC03I') {
+							$q_coois_all = "Subotica";
+						} elseif ($coois_all[$a]->wc == 'WC03O') {
+							$q_coois_all = "Subotica";
+						} elseif ($coois_all[$a]->wc == 'WC03I_K') {
+							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WC03O_K') {
+							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0055') {
+							$q_coois_all = "Utdtex";
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
+					}
+				} else {
+					$q_coois_all = "no info";
+				}
+				if ($q_coois_all == '') {
+					$q_coois_all = "no info";
 				}
 
 				// UPDATE 
@@ -273,7 +312,8 @@ class proController extends Controller {
 						approval = '".$approval."',
 						eur1 = '".$eur1."',
 						status_int = '".$status_int."',
-						location = '".$q_coois."'
+						location = '".$q_coois."',
+						location_all = '".$q_coois_all."'
 
 						WHERE pro_fr = '".$data_fr[$i]->pro_fr."';
 						SELECT TOP 1 id FROM pro;"));
@@ -363,6 +403,7 @@ class proController extends Controller {
 					}
 					$tpp = trim($inteos[0]->tpp);
 					$approval = trim($inteos[0]->approval);
+
 					$eur1 = trim($inteos[0]->eur1);
 					$status_int = $inteos[0]->status_int;
 
@@ -387,7 +428,7 @@ class proController extends Controller {
 				// UPDATE FROM COOIS
 				$coois = DB::connection('sqlsrv3')->select(DB::raw("
 					SELECT
-						DISTINCT wc 
+						DISTINCT wc, activity
 					FROM [trebovanje].[dbo].[sap_coois]
 					WHERE po like '%".$pro."%' "));
 				// var_dump($data_local[0]->pro);
@@ -409,9 +450,12 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
-						} elseif ($coois[$a]->wc == 'WCPS') {
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
-						}
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
+
 					}
 				} else {
 					$q_coois = "no info";
@@ -419,8 +463,52 @@ class proController extends Controller {
 				if ($q_coois == '') {
 					$q_coois = "no info";
 				}
-
 				// var_dump($q_coois);
+
+				// UPDATE FROM COOIS ALL
+				$coois_all = DB::connection('sqlsrv3')->select(DB::raw("
+					SELECT 
+						DISTINCT wc, activity
+					FROM [trebovanje].[dbo].[sap_coois_all]
+					WHERE po like '%".$pro."%' "));
+				// var_dump($data_local[0]->pro);
+				// var_dump($coois);
+
+				if (isset($coois_all[0]->wc)){
+					// dd($coois[0]->wc);
+						 
+					$q_coois_all = '';
+					for ($a=0; $a < count($coois_all); $a++) { 
+
+						// var_dump($coois[$a]->wc);
+						if ($coois_all[$a]->wc == 'WC03I') {
+							$q_coois_all = "Subotica";
+						} elseif ($coois_all[$a]->wc == 'WC03O') {
+							$q_coois_all = "Subotica";
+						} elseif ($coois_all[$a]->wc == 'WC03I_K') {
+							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WC03O_K') {
+							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0055') {
+							$q_coois_all = "Utdtex";
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
+					}
+				} else {
+					$q_coois_all = "no info";
+				}
+				if ($q_coois_all == '') {
+					$q_coois_all = "no info";
+				}
+
+				if (!is_null($approval) OR ($approval == '')) {
+					$tpp_shipments = "OPEN";
+				} else {
+					$tpp_shipments_exist = DB::connection('sqlsrv4')->select(DB::raw("SELECT tpp_shipments FROM [pro] WHERE pro = '".$pro."' "));
+					// dd($tpp_shipments_exist[0]->tpp_shipments);
+					$tpp_shipments = $tpp_shipments_exist[0]->tpp_shipments;
+				}
 
 				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
 						INSERT INTO pro
@@ -450,12 +538,15 @@ class proController extends Controller {
 					           ,[eur1]
 					           ,[status_int]
 					           ,[location]
+					           ,[location_all]
 
 							   ,[created_fr]
 							   ,[delivery_date]
 							   ,[delivery_date_orig]
 
 							   ,[qty]
+							   ,[tpp_shipments]
+
 							   ,[created_at]
 							   ,[updated_at])
 					           
@@ -486,12 +577,15 @@ class proController extends Controller {
 					           ,'".$eur1."'
 					           ,'".$status_int."'
 					           ,'".$q_coois."'
+					           ,'".$q_coois_all."'
 
 					           ,'".$data_fr[$i]->created_fr."'
 					           ,'".$data_fr[$i]->delivery_date."'
 					           ,'".$data_fr[$i]->delivery_date_orig."'
 
 					           ,'".$data_fr[$i]->qty."'
+					           ,'".$tpp_shipments."'
+
 					           ,'".$now."'
 					           ,'".$now."'
 							   );
@@ -616,7 +710,7 @@ class proController extends Controller {
 				// UPDATE FROM COOIS
 				$coois = DB::connection('sqlsrv3')->select(DB::raw("
 					SELECT 
-						DISTINCT wc 
+						DISTINCT wc, activity
 					FROM [trebovanje].[dbo].[sap_coois]
 					WHERE po like '%".$data_local[0]->pro."%' "));
 				// var_dump($data_local[0]->pro);
@@ -637,9 +731,11 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
-						} elseif ($coois[$a]->wc == 'WCPS') {
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
-						}
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
 					}
 				} else {
 					$q_coois = "no info";
@@ -776,7 +872,7 @@ class proController extends Controller {
 				// UPDATE FROM COOIS
 				$coois = DB::connection('sqlsrv3')->select(DB::raw("
 					SELECT
-						DISTINCT wc 
+						DISTINCT wc, activity
 					FROM [trebovanje].[dbo].[sap_coois]
 					WHERE po like '%".$pro."%' "));
 				// var_dump($data_local[0]->pro);
@@ -798,9 +894,11 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
-						} elseif ($coois[$a]->wc == 'WCPS') {
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
-						}
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						// 	$q_coois = "Subotica";
+						// }
 					}
 				} else {
 					$q_coois = "no info";
