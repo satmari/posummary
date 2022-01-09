@@ -42,7 +42,7 @@ class importController extends Controller {
 	            //Excel::selectSheets($sheetName)->load($request->file('file'), function ($reader)
 	            //Excel::selectSheets($sheetName)->load(Input::file('file'), function ($reader)
 	            //Excel::filter('chunk')->selectSheetsByIndex(0)->load(Request::file('file'))->chunk(50, function ($reader)
-	            Excel::filter('chunk')->selectSheets($sheetName)->load(Request::file('file1'))->chunk(1000, function ($reader)
+	            Excel::filter('chunk')->selectSheets($sheetName)->load(Request::file('file1'))->chunk(5000, function ($reader)
 	            
 	            {
 	                $readerarray = $reader->toArray();
@@ -123,6 +123,12 @@ class importController extends Controller {
 	                	} else {
 	                		$skeda = $existing[0]->skeda;
 	                	}
+
+	                	if (isset($row['deleted'])) {
+	                		$deleted = $row['deleted'];
+	                	} else {
+	                		$deleted = $existing[0]->deleted;
+	                	}
 						
 						
 						$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
@@ -136,7 +142,8 @@ class importController extends Controller {
 					          sent_to_inteos = '".$sent_to_int."',
 					          tpp_shipments = '".$tpp_shipments."',
 					          tpp_wastage = '".$tpp_wastage."',
-					          skeda = '".$skeda."'
+					          skeda = '".$skeda."',
+					          deleted = '".$deleted."'
 					    WHERE pro = '".$pro."';
 							   
 						SELECT TOP 1 [id] FROM [posummary].[dbo].[pro];
@@ -202,5 +209,106 @@ class importController extends Controller {
 
 	}
 
+	public function portImportSkedaStatus(Request $request)
+	{
+		$getSheetName = Excel::load(Request::file('file3'))->getSheetNames();
+	    
+	    foreach($getSheetName as $sheetName)
+	    {
+	        //if ($sheetName === 'Product-General-Table')  {
+	    	//selectSheetsByIndex(0)
+	           	// DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+	            //DB::table('users')->truncate();
 	
+	            //Excel::selectSheets($sheetName)->load($request->file('file'), function ($reader)
+	            //Excel::selectSheets($sheetName)->load(Input::file('file'), function ($reader)
+	            //Excel::filter('chunk')->selectSheetsByIndex(0)->load(Request::file('file'))->chunk(50, function ($reader)
+	            Excel::filter('chunk')->selectSheets($sheetName)->load(Request::file('file3'))->chunk(1000, function ($reader)
+	            
+	            {
+	                $readerarray = $reader->toArray();
+	                // var_dump($readerarray);
+
+	                foreach($readerarray as $row)
+	                {
+	                	// dd($row);
+						// if ($row['pro'] == '161699-000') {
+						// 	// dd($row['pro']);
+						// }
+
+						// }
+						$skeda = $row['skeda'];
+						if (!isset($row['skedastatus'])) {
+							$skeda_status = '';	
+						}
+						
+						$skeda_status = $row['skedastatus'];
+						
+						$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+						UPDATE [posummary].[dbo].[pro]
+					          SET
+					          skeda_status = '".$skeda_status."'
+
+					    WHERE skeda = '".$skeda."';
+						SELECT TOP 1 [id] FROM [posummary].[dbo].[pro];
+
+						"));
+
+	                }
+	            });
+	    }
+		return redirect('/');
+
+	}
+	
+	public function portImportNumberOfLines (Request $request) {
+		$getSheetName = Excel::load(Request::file('file4'))->getSheetNames();
+	    
+	    foreach($getSheetName as $sheetName)
+	    {
+	        //if ($sheetName === 'Product-General-Table')  {
+	    	//selectSheetsByIndex(0)
+	           	// DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+	            //DB::table('users')->truncate();
+	
+	            //Excel::selectSheets($sheetName)->load($request->file('file'), function ($reader)
+	            //Excel::selectSheets($sheetName)->load(Input::file('file'), function ($reader)
+	            //Excel::filter('chunk')->selectSheetsByIndex(0)->load(Request::file('file'))->chunk(50, function ($reader)
+	            Excel::filter('chunk')->selectSheets($sheetName)->load(Request::file('file4'))->chunk(1000, function ($reader)
+	            
+	            {
+	                $readerarray = $reader->toArray();
+	                // var_dump($readerarray);
+
+	                foreach($readerarray as $row)
+	                {
+	                	// dd($row);
+						// if ($row['pro'] == '161699-000') {
+						// 	// dd($row['pro']);
+						// }
+
+						// }
+						$pro = $row['pro'];
+						// $no_lines_by_pro = $row['no_lines_by_pro'];
+						$no_lines_by_skeda = $row['linesskeda'];
+
+						$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+						UPDATE [posummary].[dbo].[pro]
+					          SET
+					          no_lines_by_skeda = 	'".$no_lines_by_skeda."'
+
+					    WHERE pro = '".$pro."';
+						SELECT TOP 1 [id] FROM [posummary].[dbo].[pro];
+						"));
+
+						// $sql = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro]
+						// 	WHERE pro = '".$pro."'	"));
+						// dd($sql);
+
+	                }
+	            });
+	    }
+		return redirect('/');
+
+	}
 }

@@ -61,7 +61,7 @@
                             <tr>
                                 {{--<td>{{ $req->id }}</td>--}}
                                 <td>{{ $req->pro_fr }}</td>
-                                <td>{{ $req->material }}</td>
+                                <td></pre>{{ $req->sku }}</pre></td>
                                 <td>{{ $req->segment }}</td>
                                 <td>{{ $req->qty }}</td>
 

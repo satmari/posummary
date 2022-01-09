@@ -18,6 +18,7 @@ Route::get('home', 'HomeController@index');
 	
 // PRO table
 Route::get('/pro', 'proController@index');
+Route::get('/pro_all', 'proController@index_all');
 Route::get('/update_pro', 'proController@update_pro');
 Route::get('/update_pro_inteos', 'proController@update_pro_inteos');
 Route::get('/pro/edit/{id}', 'proController@edit');
@@ -39,6 +40,13 @@ Route::post('/edit_save_plo/{id}', 'ploController@edit_save');
 Route::get('/import', 'importController@index');
 Route::post('postImportPro', 'importController@postImportPro');
 Route::post('postImportPlo', 'importController@postImportPlo');
+Route::post('portImportSkedaStatus', 'importController@portImportSkedaStatus');
+Route::post('portImportNumberOfLines', 'importController@portImportNumberOfLines');
+
+// Import SAP
+Route::get('/import_sap', 'import_sapController@index');
+Route::post('postImport_mb51', 'import_sapController@postImport_mb51');
+
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',

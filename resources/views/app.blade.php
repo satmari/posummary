@@ -47,6 +47,9 @@
 				<ul class="nav navbar-nav">
 					<li><a href="{{ url('/import') }}">Import</a></li>
 				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/import_sap') }}">Import SAP</a></li>
+				</ul>
 
 				<ul class="nav navbar-nav navbar-right">
 					@if (Auth::guest())

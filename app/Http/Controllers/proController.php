@@ -23,7 +23,14 @@ class proController extends Controller {
 	public function index()
 	{
 		// dd("test");
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] "));
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		return view('PRO.index', compact('data'));
+	}
+
+	public function index_all()
+	{
+		// dd("test");
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' "));
 		return view('PRO.index', compact('data'));
 	}
 
@@ -34,7 +41,8 @@ class proController extends Controller {
 		      plo.[plo]
 		      --,plo.[plo_fr]
 		            
-		      ,plo.[material]
+		      --,plo.[material] as sku
+		      ,plo.sku
 		      ,plo.[color_desc]
 		      ,plo.[segment]
 		      ,plo.[qty]
@@ -109,7 +117,12 @@ class proController extends Controller {
 		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '80') as pdm_bom_alt
 		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '85') as flash
 		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '17') as season
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '48') as deleted
 		        ,(SELECT [ORDER_NAME] FROM [FR_Gordon].[dbo].[_ORDERS] WHERE [ORDER_ID] = o.[HOST_ORDER_ID] ) as plo_fr
+		        ,posum.pro as pro_posum
+				,posum.status_int
+		        ,inteos.pro as int_po
+		        ,inteos.[POClosed] as int_st
 
 		  FROM [FR_Gordon].[dbo].[_ORDERS] as o
 		  JOIN [FR_Gordon].[dbo].[_CUSTOMERS] as c ON c.CUSTOMER_ID = o.CUSTOMER_ID
@@ -126,11 +139,31 @@ class proController extends Controller {
 		  --JOIN [FR_Gordon].[dbo].[_PLAN_GROUPS] as pg ON pg.[GROUP_ID] = pr.[GROUP_ID]
 		  
 		  JOIN [FR_Gordon].[dbo].[_TIMETABLES] as t ON t.TIMETABLE_ID = o.TIMETABLE_ID
+
+		  LEFT JOIN [posummary].[dbo].[pro] as posum ON posum.pro_fr = o.ORDER_NAME COLLATE Latin1_General_CI_AS
+
+		  	JOIN (SELECT 
+				      SUBSTRING(su.[POnum], 4,9) as pro
+				      ,[POClosed]
+				FROM [SBT-SQLDB01P\INTEOS].[BdkCLZG].[dbo].[CNF_PO] as su
+				WHERE (su.[POClosed] = 0 OR su.[POClosed] is null) 
+
+				UNION   
+				  
+				SELECT 
+				      SUBSTRING(kik.[POnum], 4,9) as pro
+				      ,[POClosed]
+				FROM [SBT-SQLDB01P\INTEOSKKA].[BdkCLZKKA].[dbo].[CNF_PO] as kik
+				WHERE (kik.[POClosed] = 0 OR kik.[POClosed] is null) ) as inteos
+			ON inteos.pro = SUBSTRING(o.ORDER_NAME, 4,9) COLLATE Latin1_General_CI_AS
 		  
+
 		  WHERE o.ORDER_NAME like 'PRO%' AND p.PRODUCT_NAME != 'TEST1B   001 4B'
+
 		  --WHERE o.ORDER_NAME like 'PRO580640888::1::S/M'
 		  --WHERE o.ORDER_ID = '6818862' --OR o.ORDER_ID = '6768258'
 		  --WHERE o.CREATED_DATE >= Convert(datetime, '2020-05-01' ) AND ORDER_NAME like 'PRO%'
+		  --AND o.CREATED_DATE >= DATEADD(m, -1, GETDATE())
 		  
 		  Order by o.CREATED_DATE desc
 		  "));
@@ -248,8 +281,14 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
+						} elseif ($coois[$a]->wc == 'WC03I_S') {
+							$q_coois = "Senta";
+						} elseif ($coois[$a]->wc == 'WC03O_S') {
+							$q_coois = "Senta";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
+							$q_coois = "Valy";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -285,9 +324,16 @@ class proController extends Controller {
 							$q_coois_all = "Kikinda";
 						} elseif ($coois_all[$a]->wc == 'WC03O_K') {
 							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WC03I_S') {
+							$q_coois_all = "Senta";
+						} elseif ($coois_all[$a]->wc == 'WC03O_S') {
+							$q_coois_all = "Senta";
 						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0055') {
 							$q_coois_all = "Utdtex";
-						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0056') {
+							$q_coois_all = "Valy";
+						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {//elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+
 						// 	$q_coois = "Subotica";
 						// }
 					}
@@ -313,7 +359,8 @@ class proController extends Controller {
 						eur1 = '".$eur1."',
 						status_int = '".$status_int."',
 						location = '".$q_coois."',
-						location_all = '".$q_coois_all."'
+						location_all = '".$q_coois_all."',
+						deleted = '".$data_fr[$i]->deleted."'
 
 						WHERE pro_fr = '".$data_fr[$i]->pro_fr."';
 						SELECT TOP 1 id FROM pro;"));
@@ -355,6 +402,12 @@ class proController extends Controller {
 				$size = substr($material, 13);
 				$size = trim($size);
 				// dd($size);
+
+				$style_sap = str_pad($style, 9); 
+				$color_sap = str_pad($color, 4);
+				$size_sap = str_pad($size, 5);
+
+				$sku = $style_sap.$color_sap.$size_sap;
 								
 				// $get_brand =DB::connection('sqlsrv2')->select(DB::raw("SELECT brand FROM [settings].[dbo].[styles] WHERE style = '".$style."' "));
 				// dd($get_brand);
@@ -450,8 +503,14 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
+						} elseif ($coois[$a]->wc == 'WC03I_S') {
+							$q_coois = "Senta";
+						} elseif ($coois[$a]->wc == 'WC03O_S') {
+							$q_coois = "Senta";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
+							$q_coois = "Valy";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -489,8 +548,14 @@ class proController extends Controller {
 							$q_coois_all = "Kikinda";
 						} elseif ($coois_all[$a]->wc == 'WC03O_K') {
 							$q_coois_all = "Kikinda";
+						} elseif ($coois_all[$a]->wc == 'WC03I_S') {
+							$q_coois_all = "Senta";
+						} elseif ($coois_all[$a]->wc == 'WC03O_S') {
+							$q_coois_all = "Senta";
 						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0055') {
 							$q_coois_all = "Utdtex";
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0056') {
+							$q_coois_all = "Valy";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -509,6 +574,8 @@ class proController extends Controller {
 					// dd($tpp_shipments_exist[0]->tpp_shipments);
 					$tpp_shipments = $tpp_shipments_exist[0]->tpp_shipments;
 				}
+
+				$color_desc = str_replace( array( '\'','"',',',';','<','>' ), '', $data_fr[$i]->color_desc);
 
 				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
 						INSERT INTO pro
@@ -548,7 +615,9 @@ class proController extends Controller {
 							   ,[tpp_shipments]
 
 							   ,[created_at]
-							   ,[updated_at])
+							   ,[updated_at]
+							   ,[sku]
+							   ,[deleted])
 					           
 					 	VALUES
 					          ('".$pro."'
@@ -560,7 +629,7 @@ class proController extends Controller {
 					           ,'".$style."'
 					           ,'".$color."'
 					           ,'".$size."'
-					           ,'".$data_fr[$i]->color_desc."'
+					           ,'".$color_desc."'
 
 					           ,'".$data_fr[$i]->prod_type."'
 					           ,'".$data_fr[$i]->season."'
@@ -588,6 +657,8 @@ class proController extends Controller {
 
 					           ,'".$now."'
 					           ,'".$now."'
+					           ,'".$sku."'
+					           ,'".$data_fr[$i]->deleted."'
 							   );
 					
 						 SELECT TOP 1 [id] FROM pro;
@@ -731,8 +802,14 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
+						} elseif ($coois[$a]->wc == 'WC03I_S') {
+							$q_coois = "Senta";
+						} elseif ($coois[$a]->wc == 'WC03O_S') {
+							$q_coois = "Senta";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
+							$q_coois = "Valy";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -792,6 +869,12 @@ class proController extends Controller {
 				$style = substr($material, 0, 8);
 				$style = trim($style);
 				// dd($style);
+
+				$style_sap = str_pad($style, 9); 
+				$color_sap = str_pad($color, 4);
+				$size_sap = str_pad($size, 5);
+
+				$sku = $style_sap.$color_sap.$size_sap;
 
 				$color = substr($material, 9, 4);
 				$color = trim($color);
@@ -894,8 +977,14 @@ class proController extends Controller {
 							$q_coois = "Kikinda";
 						} elseif ($coois[$a]->wc == 'WC03O_K') {
 							$q_coois = "Kikinda";
+						} elseif ($coois[$a]->wc == 'WC03I_S') {
+							$q_coois = "Senta";
+						} elseif ($coois[$a]->wc == 'WC03O_S') {
+							$q_coois = "Senta";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0055') {
 							$q_coois = "Utdtex";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
+							$q_coois = "Valy";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -908,6 +997,8 @@ class proController extends Controller {
 				}
 
 				// var_dump($q_coois);
+
+				$color_desc = str_replace( array( '\'','"',',',';','<','>' ), '', $data_fr[$i]->color_desc);
 
 				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
 						INSERT INTO pro
@@ -944,7 +1035,8 @@ class proController extends Controller {
 
 							   ,[qty]
 							   ,[created_at]
-							   ,[updated_at])
+							   ,[updated_at]
+							   ,[sku])
 					           
 					 	VALUES
 					          ('".$pro."'
@@ -956,7 +1048,7 @@ class proController extends Controller {
 					           ,'".$style."'
 					           ,'".$color."'
 					           ,'".$size."'
-					           ,'".$data_fr[$i]->color_desc."'
+					           ,'".$color_desc."'
 
 					           ,'".$data_fr[$i]->prod_type."'
 					           ,'".$data_fr[$i]->season."'
@@ -981,6 +1073,7 @@ class proController extends Controller {
 					           ,'".$data_fr[$i]->qty."'
 					           ,'".$now."'
 					           ,'".$now."'
+					           ,'".$sku."'
 							   );
 					
 						 SELECT TOP 1 [id] FROM pro;

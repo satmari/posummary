@@ -168,6 +168,12 @@ class ploController extends Controller {
 				$size = trim($size);
 				// dd($size);
 
+				$style_sap = str_pad($style, 9); 
+				$color_sap = str_pad($color, 4);
+				$size_sap = str_pad($size, 5);
+
+				$sku = $style_sap.$color_sap.$size_sap;
+
 				$pro= NULL;
 								
 				// $get_brand =DB::connection('sqlsrv2')->select(DB::raw("SELECT brand FROM [settings].[dbo].[styles] WHERE style = '".$style."' "));
@@ -215,7 +221,8 @@ class ploController extends Controller {
 							   ,[qty]
 							   
 							   ,[created_at]
-							   ,[updated_at])
+							   ,[updated_at]
+							   ,[sku])
 					           
 					 	VALUES
 					          ('".$plo."'
@@ -244,6 +251,7 @@ class ploController extends Controller {
 					           ,'".$data_fr[$i]->qty."'
 					           ,'".$now."'
 					           ,'".$now."'
+					           ,'".$sku."'
 							   );
 					
 						 SELECT TOP 1 [id] FROM plo;

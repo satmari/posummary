@@ -68,6 +68,15 @@ class CreateProsTable extends Migration {
 
 			$table->string('skeda')->nullable();
 			$table->string('location_all')->nullable();
+
+			$table->string('skeda_status')->nullable();
+
+			$table->string('sku')->nullable();
+			$table->string('deleted')->nullable();
+
+			$table->string('no_lines_by_pro')->nullable();
+			$table->string('no_lines_by_skeda')->nullable();
+			
 		});
 
 	}

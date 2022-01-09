@@ -40,6 +40,42 @@
 
 				<!-- <hr> -->
 			</div>
+
+			<br>
+			<div class="panel panel-default">
+				
+				<div class="panel-heading">Import SkedaStatus from Skeda</div>
+				
+				{!! Form::open(['files'=>True, 'method'=>'POST', 'action'=>['importController@portImportSkedaStatus']]) !!}
+					<div class="panel-body">
+						{!! Form::file('file3', ['class' => 'center-block']) !!}
+					</div>
+					<div class="panel-body">
+						{!! Form::submit('Import', ['class' => 'btn btn-warning center-block']) !!}
+					</div>
+					@include('errors.list')
+				{!! Form::close() !!}
+
+				<!-- <hr> -->
+			</div>
+
+			<br>
+			<div class="panel panel-default">
+				
+				<div class="panel-heading">Import Number of lines (by PRO or by Skeda)</div>
+				
+				{!! Form::open(['files'=>True, 'method'=>'POST', 'action'=>['importController@portImportNumberOfLines']]) !!}
+					<div class="panel-body">
+						{!! Form::file('file4', ['class' => 'center-block']) !!}
+					</div>
+					<div class="panel-body">
+						{!! Form::submit('Import', ['class' => 'btn btn-warning center-block']) !!}
+					</div>
+					@include('errors.list')
+				{!! Form::close() !!}
+
+				<!-- <hr> -->
+			</div>
  
 
 		

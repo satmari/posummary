@@ -6,11 +6,14 @@
         <div class="text-center">
             <div class="panel panel-default">
 				<div class="panel-heading"><span style="color:blue"><big>PRO Table</big></span>
-				
+                &nbsp;&nbsp;
+				<a href="{{url('/pro_all')}}" class="btn  btn-warning">Full table</a>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+
                 @if (Auth::check() && Auth::user()->level() != 3)
 									
 						<a href="{{url('/update_pro')}}" class="btn btn-default btn-info">Update PRO table</a>
-                        <a href="{{url('/update_pro_inteos')}}" class="btn btn-default btn-default" disabled>Insert PRO from Inteos</a>
+                        <!-- <a href="{{url('/update_pro_inteos')}}" class="btn btn-default btn-default" disabled>Insert PRO from Inteos</a> -->
 				               
                 @endif
                 </div>
@@ -86,6 +89,8 @@
 
                                 <th><span style="color:pink">PDM file</span></th>
                                 <th><span style="color:pink">Skeda</span></th>
+                                <th><span style="color:pink">Skeda Status</span></th>
+                                <th><span style="color:pink">No of Lines</span></th>
                                 
                                 <th><small>Output</small></th>
                                 <th><small>Strip </small></th>
@@ -99,7 +104,7 @@
                             <tr>
                                 {{--<td>{{ $req->id }}</td>--}}
                                 <td><span style="font-size: 15px;">{{ $req->pro }}</span></td>
-                                <td><span style="font-size: 10px;">{{ $req->material }}</span></td>
+                                <td><span style="font-size: 10px;"><pre>{{ $req->sku }}</pre></span></td>
                                 <td><span style="font-size: 5px;">{{ $req->color_desc }}</span></td>
                                 <td><span style="font-size: 10px;">{{ $req->location_all }}</span></td>
                                 
@@ -125,6 +130,8 @@
 
                                 <td><span style="font-size: 8px;">{{ $req->pdm }}</span></td>
                                 <td><span style="font-size: 8px;">{{ $req->skeda }}</span></td>
+                                <td><span style="font-size: 8px;">{{ $req->skeda_status }}</span></td>
+                                <td><span style="font-size: 8px;">{{ $req->no_lines_by_skeda }}</span></td>
                                 
                                 @if (Auth::check() && Auth::user()->level() != 3)
                                     <td><a href="{{ url('/pro/conf/'.$req->id) }}" class="btn btn-primary btn-xs center-block">Conf</a></td>

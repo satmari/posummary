@@ -56,7 +56,7 @@
                             <tr>
                                 {{--<td>{{ $req->id }}</td>--}}
                                 <td>{{ $req->po }}</td>
-                                <td>{{ $req->fg }}</td>
+                                <td></pre>{{ $req->fg }}</pre></td>
                                 <td>{{ $req->wc }}</td>
                                 <td>{{ $req->activity }}</td>
                                 <td>{{ $req->material }}</td>

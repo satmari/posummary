@@ -73,7 +73,7 @@
                             <tr>
                                 {{--<td>{{ $req->id }}</td>--}}
                                 <td>{{ $req->plo }}</td>
-                                <td>{{ $req->material }}</td>
+                                <td><pre>{{ $req->sku }}</pre></td>
                                 <td>{{ $req->color_desc }}</td>
                                 
                                 <td>{{ $req->segment }}</td>
