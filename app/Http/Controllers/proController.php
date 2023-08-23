@@ -20,29 +20,28 @@ use Session;
 
 class proController extends Controller {
 
-	public function index()
-	{
+	public function index() {
 		// dd("test");
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		// $data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
 		return view('PRO.index', compact('data'));
 	}
 
-	public function index_all()
-	{
+	public function index_all() {
+
 		// dd("test");
 		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' "));
 		return view('PRO.index', compact('data'));
 	}
 
-	public function table()
-	{
+	public function table() {
 		// dd("test");
 		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT 
 		      plo.[plo]
 		      --,plo.[plo_fr]
 		            
 		      --,plo.[material] as sku
-		      ,plo.sku
+		      ,plo.[sku]
 		      ,plo.[color_desc]
 		      ,plo.[segment]
 		      ,plo.[qty]
@@ -51,23 +50,22 @@ class proController extends Controller {
 		      ,plo.[routing]
 		      ,plo.[prod_version]
 		      
-		      ,pro.pro
-		      ,pro.ec_cost
-		      ,pro.pref_origin
-		      ,pro.release
-		      ,pro.sent_to_inteos
+		      ,pro.[pro]
+		      ,pro.[ec_cost]
+		      ,pro.[pref_origin]
+		      ,pro.[release]
+		      ,pro.[sent_to_inteos]
 		      
 		      ,pro.[delivery_date_orig]
 		      
 		  FROM [posummary].[dbo].[plo] as plo
-		  LEFT JOIN [posummary].[dbo].[pro] as pro ON pro.pro_fr = plo.pro_fr
-		  ORDER by plo.plo asc"));
+		  LEFT JOIN [posummary].[dbo].[pro] as pro ON pro.[pro_fr] = plo.[pro_fr]
+		  ORDER by plo.[plo] asc"));
 
 		return view('PRO.table', compact('data'));
 	}
 
-	public function update_pro()
-	{
+	public function update_pro() {
 		//
 		$data_fr = DB::connection('sqlsrv1')->select(DB::raw("SELECT  --o.*
 				--o.ORDER_ID
@@ -220,6 +218,15 @@ class proController extends Controller {
 					WHERE POnum like '%".$data_local[0]->pro."' "));
 
 				// dd($inteos);
+				$status_int = $inteos[0]->status_int;
+				print_r($status_int);
+				if (is_null($status_int) OR ($status_int == 0)) {
+						$status_int = "Open";
+					} else if ($status_int == 1) {
+						$status_int = "Closed";
+					} else {
+						$status_int = "no info";
+				}
 
 				if (isset($inteos[0]->brand)) {
 					// dd('set');
@@ -237,15 +244,7 @@ class proController extends Controller {
 					$tpp = trim($inteos[0]->tpp);
 					$approval = trim($inteos[0]->approval);
 					$eur1 = trim($inteos[0]->eur1);
-					$status_int = $inteos[0]->status_int;
-
-					if (is_null($status_int) OR ($status_int == 0)) {
-						$status_int = "Open";
-					} else if ($status_int == 1) {
-						$status_int = "Closed";
-					} else {
-						$status_int = "no info";
-					}
+					
 
 				} else {
 					// var_dump('Not exist in Inteos');
@@ -289,6 +288,8 @@ class proController extends Controller {
 							$q_coois = "Utdtex";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
 							$q_coois = "Valy";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0057') {
+							$q_coois = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -332,6 +333,8 @@ class proController extends Controller {
 							$q_coois_all = "Utdtex";
 						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0056') {
 							$q_coois_all = "Valy";
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0057') {
+							$q_coois_all = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {//elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 
 						// 	$q_coois = "Subotica";
@@ -350,13 +353,13 @@ class proController extends Controller {
 						SET 
 						plo_fr = '".$data_fr[$i]->plo_fr."',
 						created_fr = '".$data_fr[$i]->created_fr."', 
-						delivery_date = '".$data_fr[$i]->delivery_date."',
 						delivery_date_orig = '".$data_fr[$i]->delivery_date_orig."',
 						qty = '".$data_fr[$i]->qty."',
 						brand = '".$brand."',
 						tpp = '".$tpp."',
 						approval = '".$approval."',
 						eur1 = '".$eur1."',
+						pref_origin = '".$eur1."',
 						status_int = '".$status_int."',
 						location = '".$q_coois."',
 						location_all = '".$q_coois_all."',
@@ -379,9 +382,11 @@ class proController extends Controller {
 				{
 					list($one, $two) = explode('-', $po_array[0]);
 					$po = substr($one,-6,6);
+					$po_new = substr($one,-7,7);
 					
 				} else {
 					$po = substr($po_array[0],-6,6);
+					$po_new = substr($po_array[0],-7,7);
 				}
 				// var_dump($po);
 				// dd($po);
@@ -441,6 +446,17 @@ class proController extends Controller {
 					WHERE POnum like '%".$pro."' "));
 				// dd($inteos);
 
+				$status_int = $inteos[0]->status_int;
+				// print_r($status_int);
+
+				if (is_null($status_int) OR ($status_int == 0)) {
+						$status_int = "Open";
+					} else if ($status_int == 1) {
+						$status_int = "Closed";
+					} else {
+						$status_int = "no info";
+				}
+
 				if (isset($inteos[0]->brand)) {
 					// dd('set');
 
@@ -458,15 +474,9 @@ class proController extends Controller {
 					$approval = trim($inteos[0]->approval);
 
 					$eur1 = trim($inteos[0]->eur1);
-					$status_int = $inteos[0]->status_int;
+					
 
-					if (is_null($status_int) OR ($status_int == 0)) {
-						$status_int = "Open";
-					} else if ($status_int == 1) {
-						$status_int = "Closed";
-					} else {
-						$status_int = "no info";
-					}
+					
 
 				} else {
 					// var_dump('Not exist in Inteos');
@@ -511,6 +521,8 @@ class proController extends Controller {
 							$q_coois = "Utdtex";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
 							$q_coois = "Valy";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0057') {
+							$q_coois = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -556,6 +568,8 @@ class proController extends Controller {
 							$q_coois_all = "Utdtex";
 						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0056') {
 							$q_coois_all = "Valy";
+						} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0057') {
+							$q_coois_all = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -582,6 +596,7 @@ class proController extends Controller {
 					           ([pro]
 					           ,[pro_fr]
 					           ,[po]
+					           ,[po_new]
 					           ,[plo_fr]
 
 					           ,[material]
@@ -603,12 +618,13 @@ class proController extends Controller {
 					           ,[tpp]
 					           ,[approval]
 					           ,[eur1]
+					           ,[pref_origin]
 					           ,[status_int]
 					           ,[location]
 					           ,[location_all]
 
 							   ,[created_fr]
-							   ,[delivery_date]
+							   
 							   ,[delivery_date_orig]
 
 							   ,[qty]
@@ -623,6 +639,7 @@ class proController extends Controller {
 					          ('".$pro."'
 					           ,'".$data_fr[$i]->pro_fr."'
 					           ,'".$po."'
+					           ,'".$po_new."'
 							   ,'".$data_fr[$i]->plo_fr."'
 
 					           ,'".$data_fr[$i]->material."'
@@ -644,12 +661,13 @@ class proController extends Controller {
 					           ,'".$tpp."'
 					           ,'".$approval."'
 					           ,'".$eur1."'
+					           ,'".$eur1."'
 					           ,'".$status_int."'
 					           ,'".$q_coois."'
 					           ,'".$q_coois_all."'
 
 					           ,'".$data_fr[$i]->created_fr."'
-					           ,'".$data_fr[$i]->delivery_date."'
+					           
 					           ,'".$data_fr[$i]->delivery_date_orig."'
 
 					           ,'".$data_fr[$i]->qty."'
@@ -683,8 +701,61 @@ class proController extends Controller {
 		return Redirect::to('/pro');
 	}
 
-	public function update_pro_inteos()
-	{
+	public function update_pro_from_inteos() {
+
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		// dd($data);
+
+		for ($i=0; $i < count($data); $i++) { 
+
+			//UPDATE FROM INTEOS
+
+				// dd($data[$i]->pro);
+
+				$pro = $data[$i]->pro;
+				$inteos = DB::connection('sqlsrv4')->select(DB::raw("
+					SELECT POnum
+					      ,[Brand] as brand
+					      ,[TPP] as tpp
+					      ,[Approval] as approval
+					      ,[EUR1] as eur1
+					      ,[POClosed] as status_int
+					FROM [BdkCLZG].[dbo].[CNF_PO]
+					WHERE POnum like '%".$pro."'
+       			    UNION
+					SELECT POnum
+					      ,[Brand] as brand
+					      ,[TPP] as tpp
+					      ,[Approval] as approval
+					      ,[EUR1] as eur1
+					      ,[POClosed] as status_int
+					FROM [SBT-SQLDB01P\INTEOSKKA].[BdkCLZKKA].[dbo].[CNF_PO]
+					WHERE POnum like '%".$pro."' "));
+				// dd($inteos);
+
+				$status_int = $inteos[0]->status_int;
+				// print_r($status_int);
+
+				if (is_null($status_int) OR ($status_int == 0)) {
+						$status_int = "Open";
+					} else if ($status_int == 1) {
+						$status_int = "Closed";
+					} else {
+						$status_int = "no info";
+				}
+
+				// dd($status_int);
+				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+						UPDATE pro
+						SET [status_int] = '".$status_int."'
+						WHERE pro = '".$pro."';
+						SELECT TOP 1 id FROM pro;"));
+
+		}
+		return Redirect::to('/pro');
+	}
+
+	public function update_pro_inteos() {
 		//
 		$data_int = DB::connection('sqlsrv4')->select(DB::raw("
 		  "));
@@ -703,9 +774,11 @@ class proController extends Controller {
 			{
 				list($one, $two) = explode('-', $po_array[0]);
 				$po = substr($one,-6,6);
+				$po_new = substr($one,-7,7);
 				
 			} else {
 				$po = substr($po_array[0],-6,6);
+				$po_new = substr($po_array[0],-7,7);
 			}
 			// var_dump($po);
 			// dd($po);
@@ -810,6 +883,8 @@ class proController extends Controller {
 							$q_coois = "Utdtex";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
 							$q_coois = "Valy";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0057') {
+							$q_coois = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -834,6 +909,7 @@ class proController extends Controller {
 						tpp = '".$tpp."',
 						approval = '".$approval."',
 						eur1 = '".$eur1."',
+						pref_origin = '".$eur1."',
 						status_int = '".$status_int."',
 						location = '".$q_coois."'
 
@@ -985,6 +1061,8 @@ class proController extends Controller {
 							$q_coois = "Utdtex";
 						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0056') {
 							$q_coois = "Valy";
+						} elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0057') {
+							$q_coois = "Kayra";
 						} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
 						// 	$q_coois = "Subotica";
 						// }
@@ -1005,6 +1083,7 @@ class proController extends Controller {
 					           ([pro]
 					           ,[pro_fr]
 					           ,[po]
+					           ,[po_new]
 					           ,[plo_fr]
 
 					           ,[material]
@@ -1026,6 +1105,7 @@ class proController extends Controller {
 					           ,[tpp]
 					           ,[approval]
 					           ,[eur1]
+					           ,[pref_origin]
 					           ,[status_int]
 					           ,[location]
 
@@ -1042,6 +1122,7 @@ class proController extends Controller {
 					          ('".$pro."'
 					           ,'".$data_fr[$i]->pro_fr."'
 					           ,'".$po."'
+					           ,'".$po_new."'
 							   ,'".$data_fr[$i]->plo_fr."'
 
 					           ,'".$data_fr[$i]->material."'
@@ -1062,6 +1143,7 @@ class proController extends Controller {
 					           ,'".$brand."'
 					           ,'".$tpp."'
 					           ,'".$approval."'
+					           ,'".$eur1."'
 					           ,'".$eur1."'
 					           ,'".$status_int."'
 					           ,'".$q_coois."'
@@ -1098,16 +1180,74 @@ class proController extends Controller {
 		return Redirect::to('/pro');
 	}
 
-	public function edit(Request $request, $id)
-	{
+	public function update_destination () {
+
+		$data_local = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,location_all FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed'"));
+		// dd($data_local);
+
+		for ($i=0; $i < count($data_local); $i++) { 
+
+			$pro = $data_local[$i]->pro;
+			$id = $data_local[$i]->id;
+
+			// UPDATE FROM COOIS ALL
+			$coois_all = DB::connection('sqlsrv3')->select(DB::raw("
+				SELECT 
+					DISTINCT wc, activity
+				FROM [trebovanje].[dbo].[sap_coois_all]
+				WHERE po like '%".$pro."%' "));
+			// var_dump($data_local[0]->pro);
+			// var_dump($coois);
+
+			if (isset($coois_all[0]->wc)){
+				// dd($coois[0]->wc);
+					 
+				$q_coois_all = '';
+				for ($a=0; $a < count($coois_all); $a++) { 
+
+					// var_dump($coois[$a]->wc);
+					if ($coois_all[$a]->wc == 'WC03I') {
+						$q_coois_all = "Subotica";
+					} elseif ($coois_all[$a]->wc == 'WC03O') {
+						$q_coois_all = "Subotica";
+					} elseif ($coois_all[$a]->wc == 'WC03I_K') {
+						$q_coois_all = "Kikinda";
+					} elseif ($coois_all[$a]->wc == 'WC03O_K') {
+						$q_coois_all = "Kikinda";
+					} elseif ($coois_all[$a]->wc == 'WC03I_S') {
+						$q_coois_all = "Senta";
+					} elseif ($coois_all[$a]->wc == 'WC03O_S') {
+						$q_coois_all = "Senta";
+					} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0055') {
+						$q_coois_all = "Utdtex";
+					} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0056') {
+						$q_coois_all = "Valy";
+					} elseif ($coois_all[$a]->wc == 'WCPS' and $coois_all[$a]->activity == '0057') {
+						$q_coois_all = "Kayra";
+					} //elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {//elseif ($coois[$a]->wc == 'WCPS' and $coois[$a]->activity == '0035') {
+
+					// 	$q_coois = "Subotica";
+					// }
+				}
+			} else {
+				$q_coois_all = "no info";
+			}
+			
+			$table = pro::findOrFail($id);
+			$table->location_all = $q_coois_all;
+			$table->save();
+		}
+		return Redirect::to('/pro');
+	}
+
+	public function edit(Request $request, $id) {
 		//
 		$input = $request->all(); // change use (delete or comment user Requestl; )
 		$pro = PRO::findOrFail($id);
 		return view('PRO.edit', compact('pro'));
 	}
 
-	public function edit_save(Request $request, $id)
-	{
+	public function edit_save(Request $request, $id) {
 		//
 		$input = $request->all(); // change use (delete or comment user Requestl; )
 		// dd($input);
@@ -1123,15 +1263,20 @@ class proController extends Controller {
 		$table->tpp_shipments = $input['tpp_shipments'];
 		$table->tpp_wastage = $input['tpp_wastage'];
 		$table->skeda = $input['skeda'];
+		$table->deleted = $input['delete'];
+		if ($input['delete'] == 'DELETED') {
+			$table->status_int = 'Closed';
+		}
+		$table->delivery_date = $input['delivery_date'];
+
 		// dd($input['sent_to_inteos']);
 		$table->save();
 		
 		return Redirect::to('/pro');
 	}
 
-	public function conf(Request $request, $id)
-	{
-		//
+	public function conf(Request $request, $id) {
+		
 		$input = $request->all(); // change use (delete or comment user Requestl; )
 		//var_dump($input);
 
@@ -1333,8 +1478,7 @@ class proController extends Controller {
 		return view('PRO.index_conf', compact('data'));
 	}
 
-	public function strip(Request $request, $id)
-	{
+	public function strip(Request $request, $id) {
 		//
 		$input = $request->all(); // change use (delete or comment user Requestl; )
 		//var_dump($input);
@@ -1409,8 +1553,7 @@ class proController extends Controller {
 		return view('PRO.index_strip', compact('data'));
 	}
 
-	public function coois(Request $request, $id)
-	{
+	public function coois(Request $request, $id) {
 		//
 		$input = $request->all(); // change use (delete or comment user Requestl; )
 		//var_dump($input);
@@ -1418,24 +1561,25 @@ class proController extends Controller {
 		$data_local = DB::connection('sqlsrv')->select(DB::raw("SELECT pro FROM pro WHERE id = '".$id."' "));
 		// dd($data_local[0]->pro);
 
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT [po]
-		      ,[fg]
-		      ,[activity]
-		      ,[wc]
-		      ,[list]
-		      ,[material]
-		      ,[uom]
-		      ,[description]
-		      ,[standard_qty]
-		      ,[uom_desc]
-		      ,[created_at]
-		      ,[updated_at]
-		  FROM [trebovanje].[dbo].[sap_coois]
-		  WHERE po = '".$data_local[0]->pro."' ORDER BY wc asc "));
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT a.[po]
+		      ,a.[fg]
+		      ,a.[activity]
+		      ,a.[wc]
+		      ,a.[list]
+		      ,a.[material]
+		      ,a.[uom]
+		      --,a.[description]
+		      ,(SELECT description FROM [trebovanje].[dbo].[sap_coois] WHERE po = a.po and [material] = a.[material] and wc = a.wc and list = a.list) as description
+		      ,a.[standard_qty]
+		      ,a.[uom_desc]
+		      ,a.[created_at]
+		      ,a.[updated_at]
+		  FROM [trebovanje].[dbo].[sap_coois_all] as a
+		  WHERE a.[po] = '".$data_local[0]->pro."' ORDER BY a.[wc] asc "));
 		// dd($data);
 
 		return view('PRO.index_coois', compact('data'));
 	}
 
-	
+
 }

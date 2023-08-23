@@ -76,6 +76,10 @@ class CreateProsTable extends Migration {
 
 			$table->string('no_lines_by_pro')->nullable();
 			$table->string('no_lines_by_skeda')->nullable();
+
+			$table->string('po_new')->nullable();
+
+			$table->date('skeda_status_updated_at')->nullable();
 			
 		});
 

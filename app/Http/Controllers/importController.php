@@ -19,17 +19,17 @@ use App\pro;
 use DB;
 use Log;
 use Session;
+use DateTime;
 
 class importController extends Controller {
 
-	public function index()
-	{
+	public function index() {
 		//
 		return view('import.index');
+	
 	}
 
-	public function postImportPro(Request $request)
-	{
+	public function postImportPro(Request $request) {
 		$getSheetName = Excel::load(Request::file('file1'))->getSheetNames();
 	    
 	    foreach($getSheetName as $sheetName)
@@ -54,6 +54,7 @@ class importController extends Controller {
 						// if ($row['pro'] == '580644937') {
 						// 	dd($row);
 						// }
+						// dd($row);
 
 	                	$pro = $row['pro'];
 	                	// dd($pro);
@@ -64,6 +65,7 @@ class importController extends Controller {
 	                		
 	                	} else {
 	                		continue;
+	                		// exit foreach if not exist
 	                	}
 
 	                	if (isset($row['pdm_file'])) {
@@ -124,14 +126,38 @@ class importController extends Controller {
 	                		$skeda = $existing[0]->skeda;
 	                	}
 
+	                	if (isset($row['del_date'])) {
+	                		if ($row['del_date'] != NULL) {
+	                			
+	                			$excelDate =$row['del_date'];
+		                		$baseDate = new DateTime('1899-12-30'); // Adjusted base date for Excel
+								$excelDateTime = $baseDate->modify("+{$excelDate} days");
+								$phpDate = $excelDateTime->format('Y-m-d');
+		                		$del_date = $phpDate;
+	                		}
+
+	                	} else {
+	                		$del_date = $existing[0]->delivery_date;
+	                	}
+	                	// dd($del_date);
+
 	                	if (isset($row['deleted'])) {
 	                		$deleted = $row['deleted'];
 	                	} else {
 	                		$deleted = $existing[0]->deleted;
 	                	}
-						
-						
-						$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+
+	                	// else {
+	                	// 	if (is_null($row['deleted'])) {
+	                	// 		$deleted = '';
+	                	// 	} else if ($row['deleted'] == '') {
+	                	// 		$deleted = '';
+	                	// 	} else {
+	                	// 		$deleted = $existing[0]->deleted;
+	                	// 	}
+	                	// }
+	                	
+						$sql = DB::connection('sqlsrv')->update(DB::raw("SET NOCOUNT ON;
 						UPDATE [posummary].[dbo].[pro]
 					          SET
 					          pdm = '".$pdm."',
@@ -143,10 +169,9 @@ class importController extends Controller {
 					          tpp_shipments = '".$tpp_shipments."',
 					          tpp_wastage = '".$tpp_wastage."',
 					          skeda = '".$skeda."',
+					          delivery_date = '".$del_date."',
 					          deleted = '".$deleted."'
-					    WHERE pro = '".$pro."';
-							   
-						SELECT TOP 1 [id] FROM [posummary].[dbo].[pro];
+					    WHERE pro = '".$pro."' 						
 						"));
 						
 
@@ -157,8 +182,7 @@ class importController extends Controller {
 
 	}
 
-	public function postImportPlo(Request $request)
-	{
+	public function postImportPlo(Request $request) {
 
 		$getSheetName = Excel::load(Request::file('file2'))->getSheetNames();
 	    
@@ -209,8 +233,7 @@ class importController extends Controller {
 
 	}
 
-	public function portImportSkedaStatus(Request $request)
-	{
+	public function portImportSkedaStatus(Request $request) {
 		$getSheetName = Excel::load(Request::file('file3'))->getSheetNames();
 	    
 	    foreach($getSheetName as $sheetName)
@@ -238,21 +261,43 @@ class importController extends Controller {
 
 						// }
 						$skeda = $row['skeda'];
+
 						if (!isset($row['skedastatus'])) {
 							$skeda_status = '';	
+						} else {
+							$skeda_status = $row['skedastatus'];	
 						}
-						
-						$skeda_status = $row['skedastatus'];
-						
-						$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
-						UPDATE [posummary].[dbo].[pro]
-					          SET
-					          skeda_status = '".$skeda_status."'
 
-					    WHERE skeda = '".$skeda."';
-						SELECT TOP 1 [id] FROM [posummary].[dbo].[pro];
+	
+						$existing_skeda = DB::connection('sqlsrv')->select(DB::raw("SELECT id, pro, skeda, skeda_status FROM pro WHERE skeda = '".$skeda."' "));
+						// dd($existing_skeda);
 
-						"));
+						$date = date('Y-m-d');
+						// dd($date);
+
+						foreach($existing_skeda as $line) {
+							// dd($line);
+
+						 	$id = $line->id;
+						 	// dd($id);
+						 	$existing_skeda_status = $line->skeda_status;
+
+						 	if ($existing_skeda_status == $skeda_status) {
+						 		//continue
+
+						 	} else {
+						 		// update
+
+						 		$sql = DB::connection('sqlsrv')->update(DB::raw("
+								 	UPDATE [posummary].[dbo].[pro]
+					 	  				SET skeda_status = '".$skeda_status."', skeda_status_updated_at = '".$date."'
+					 	  			WHERE id = '".$id."' "));
+
+						 	}
+
+						}
+
+						
 
 	                }
 	            });

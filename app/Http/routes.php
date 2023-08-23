@@ -21,6 +21,9 @@ Route::get('/pro', 'proController@index');
 Route::get('/pro_all', 'proController@index_all');
 Route::get('/update_pro', 'proController@update_pro');
 Route::get('/update_pro_inteos', 'proController@update_pro_inteos');
+Route::get('/update_pro_from_inteos', 'proController@update_pro_from_inteos');
+Route::get('/update_destination', 'proController@update_destination');
+
 Route::get('/pro/edit/{id}', 'proController@edit');
 Route::post('/edit_save_pro/{id}', 'proController@edit_save');
 Route::get('/pro/conf/{id}', 'proController@conf');

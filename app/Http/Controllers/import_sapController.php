@@ -22,14 +22,12 @@ use Session;
 
 class import_sapController extends Controller {
 
-	public function index()
-	{
+	public function index() {
 		//
 		return view('import.index_sap');
 	}
 
-	public function postImport_mb51(Request $request)
-	{
+	public function postImport_mb51(Request $request) {
 		$getSheetName = Excel::load(Request::file('file1'))->getSheetNames();
 	    
 	    foreach($getSheetName as $sheetName)

@@ -23,6 +23,11 @@
 						{!! Form::input('string', 'flash_type', $pro->flash_type, ['class' => 'form-control']) !!}
 					</div>
 
+					<div class="panel-body">
+						<span>Del date (format: m/d/y):</span>
+						<input type="date" name="delivery_date" id="date" class="form-control" style="width: 100%; display: inline;" value="{{ date('Y-m-d', strtotime($pro->delivery_date))  }}">
+					</div>
+
 					<hr>
 
 					<div class="panel-body">
@@ -62,6 +67,11 @@
 					<div class="panel-body">
 						<span>Skeda: <span style="color:red;">*</span></span>
 						{!! Form::input('string', 'skeda', $pro->skeda , ['class' => 'form-control']) !!}
+					</div>
+
+					<div class="panel-body">
+						<span>Deleted: <span style="color:red;">*</span></span>
+						{!! Form::select('delete', array(''=>'','DELETED'=>'DELETED'), $pro->deleted, array('class' => 'form-control')); !!} 
 					</div>
 
 					<div class="panel-body">
