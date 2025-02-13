@@ -23,7 +23,8 @@ class proController extends Controller {
 	public function index() {
 		// dd("test");
 		// $data = DB::connection('sqlsrv')->select(DB::raw("SELECT * FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,target_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  
+			FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
 		return view('PRO.index', compact('data'));
 	}
 
@@ -138,7 +139,7 @@ class proController extends Controller {
 		  
 		  JOIN [FR_Gordon].[dbo].[_TIMETABLES] as t ON t.TIMETABLE_ID = o.TIMETABLE_ID
 
-		  LEFT JOIN [posummary].[dbo].[pro] as posum ON posum.pro_fr = o.ORDER_NAME COLLATE Latin1_General_CI_AS
+		  LEFT JOIN [172.27.161.200].[posummary].[dbo].[pro] as posum ON posum.pro_fr = o.ORDER_NAME COLLATE Latin1_General_CI_AS
 
 		  	JOIN (SELECT 
 				      SUBSTRING(su.[POnum], 4,9) as pro
@@ -238,6 +239,8 @@ class proController extends Controller {
 						$brand = "Calzedonia";
 					} else if ($brands == 'INT') {
 						$brand = "Intimissimi";
+					} else if ($brands == 'INT MAN') {
+						$brand = "Intimissimi Uomo";
 					} else {
 						$brand = "Outlet";
 					}
@@ -348,7 +351,7 @@ class proController extends Controller {
 				}
 
 				// UPDATE 
-				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+				$sql = DB::connection('sqlsrv')->update(DB::raw("
 						UPDATE pro
 						SET 
 						plo_fr = '".$data_fr[$i]->plo_fr."',
@@ -365,8 +368,7 @@ class proController extends Controller {
 						location_all = '".$q_coois_all."',
 						deleted = '".$data_fr[$i]->deleted."'
 
-						WHERE pro_fr = '".$data_fr[$i]->pro_fr."';
-						SELECT TOP 1 id FROM pro;"));
+						WHERE pro_fr = '".$data_fr[$i]->pro_fr."' "));
 	
 			} else  {
 				// var_dump("not exist");	
@@ -467,6 +469,8 @@ class proController extends Controller {
 						$brand = "Calzedonia";
 					} else if ($brands == 'INT') {
 						$brand = "Intimissimi";
+					} else if ($brands == 'INT MAN') {
+						$brand = "Intimissimi Uomo";
 					} else {
 						$brand = "Outlet";
 					}
@@ -591,7 +595,7 @@ class proController extends Controller {
 
 				$color_desc = str_replace( array( '\'','"',',',';','<','>' ), '', $data_fr[$i]->color_desc);
 
-				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+				$sql = DB::connection('sqlsrv')->update(DB::raw("
 						INSERT INTO pro
 					           ([pro]
 					           ,[pro_fr]
@@ -677,9 +681,9 @@ class proController extends Controller {
 					           ,'".$now."'
 					           ,'".$sku."'
 					           ,'".$data_fr[$i]->deleted."'
-							   );
+							   )
 					
-						 SELECT TOP 1 [id] FROM pro;
+						
 						
 						"));
 
@@ -703,8 +707,10 @@ class proController extends Controller {
 
 	public function update_pro_from_inteos() {
 
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  FROM [posummary].[dbo].[pro] WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
+		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT id,pro,sku,color_desc,location_all,segment,brand,approval,eur1,status_int,qty,delivery_date,flash_type,tpp_shipments,tpp_wastage,pdm,skeda,skeda_status,no_lines_by_skeda  FROM [posummary].[dbo].[pro] 
+			WHERE deleted != 'DELETED' AND status_int != 'Closed' "));
 		// dd($data);
+		print_r('<br/>');
 
 		for ($i=0; $i < count($data); $i++) { 
 
@@ -733,26 +739,60 @@ class proController extends Controller {
 					WHERE POnum like '%".$pro."' "));
 				// dd($inteos);
 
-				$status_int = $inteos[0]->status_int;
-				// print_r($status_int);
 
-				if (is_null($status_int) OR ($status_int == 0)) {
+				if (!isset($inteos[0]->POnum)) {
+					print_r("Komesa ".$pro." nije pronadjena u inteosu (Su i Ki) <br/>");
+					
+				} else {
+
+					$status_int = $inteos[0]->status_int;
+					// print_r($status_int);
+
+					if (is_null($status_int) OR ($status_int == 0)) {
 						$status_int = "Open";
 					} else if ($status_int == 1) {
 						$status_int = "Closed";
 					} else {
 						$status_int = "no info";
+					}
+
+					if (isset($inteos[0]->brand)) {
+
+						$brands = trim($inteos[0]->brand);
+						if ($brands == 'TZN') {
+							$brand = "Tezenis";
+						} else if ($brands == 'CLZ') {
+							$brand = "Calzedonia";
+						} else if ($brands == 'INT') {
+							$brand = "Intimissimi";
+						} else if ($brands == 'INT MAN') {
+							$brand = "Intimissimi Uomo";
+						} else {
+							$brand = "Outlet";
+						}
+
+					}
+
+					$tpp = trim($inteos[0]->tpp);
+					$approval = trim($inteos[0]->approval);
+					$eur1 = trim($inteos[0]->eur1);
+
+					// dd($status_int);
+					$sql = DB::connection('sqlsrv')->update(DB::raw("
+							UPDATE pro
+							SET [status_int] = '".$status_int."',
+								[brand] = '".$brand."',
+								[tpp] = '".$tpp."',
+								[approval] = '".$approval."',
+								[eur1] = '".$eur1."'
+								
+							WHERE pro = '".$pro."'
+					"));
 				}
 
-				// dd($status_int);
-				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
-						UPDATE pro
-						SET [status_int] = '".$status_int."'
-						WHERE pro = '".$pro."';
-						SELECT TOP 1 id FROM pro;"));
-
 		}
-		return Redirect::to('/pro');
+		// return Redirect::to('/pro');
+		print_r("<hr/> <br/> Uspesno uradjen update Inteos statusa. Ukoliko ima gresaka iznad, javiti planerima.");
 	}
 
 	public function update_pro_inteos() {
@@ -825,6 +865,8 @@ class proController extends Controller {
 						$brand = "Calzedonia";
 					} else if ($brands == 'INT') {
 						$brand = "Intimissimi";
+					} else if ($brands == 'INT MAN') {
+						$brand = "Intimissimi Uomo";
 					} else {
 						$brand = "Outlet";
 					}
@@ -897,7 +939,7 @@ class proController extends Controller {
 				}
 
 				// UPDATE 
-				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+				$sql = DB::connection('sqlsrv')->update(DB::raw("
 						UPDATE pro
 						SET 
 						plo_fr = '".$data_fr[$i]->plo_fr."',
@@ -913,8 +955,7 @@ class proController extends Controller {
 						status_int = '".$status_int."',
 						location = '".$q_coois."'
 
-						WHERE pro_fr = '".$data_fr[$i]->pro_fr."';
-						SELECT TOP 1 id FROM pro;"));
+						WHERE pro_fr = '".$data_fr[$i]->pro_fr."' "));
 	
 			} else  {
 				// var_dump("not exist");	
@@ -1002,6 +1043,8 @@ class proController extends Controller {
 						$brand = "Calzedonia";
 					} else if ($brands == 'INT') {
 						$brand = "Intimissimi";
+					} else if ($brands == 'INT MAN') {
+						$brand = "Intimissimi Uomo";
 					} else {
 						$brand = "Outlet";
 					}
@@ -1078,7 +1121,7 @@ class proController extends Controller {
 
 				$color_desc = str_replace( array( '\'','"',',',';','<','>' ), '', $data_fr[$i]->color_desc);
 
-				$sql = DB::connection('sqlsrv')->select(DB::raw("SET NOCOUNT ON;
+				$sql = DB::connection('sqlsrv')->update(DB::raw("
 						INSERT INTO pro
 					           ([pro]
 					           ,[pro_fr]
@@ -1156,9 +1199,7 @@ class proController extends Controller {
 					           ,'".$now."'
 					           ,'".$now."'
 					           ,'".$sku."'
-							   );
-					
-						 SELECT TOP 1 [id] FROM pro;
+							   )
 						
 						"));
 
@@ -1269,6 +1310,12 @@ class proController extends Controller {
 		}
 		$table->delivery_date = $input['delivery_date'];
 
+		if ($input['target_date'] == '1970-01-01') {
+			$table->target_date = NULL;
+		} else {
+			$table->target_date = $input['target_date'];
+		}
+		
 		// dd($input['sent_to_inteos']);
 		$table->save();
 		
@@ -1281,79 +1328,10 @@ class proController extends Controller {
 		//var_dump($input);
 
 		$data_local = DB::connection('sqlsrv')->select(DB::raw("SELECT pro_fr FROM pro WHERE id = '".$id."' "));
+		// dd($data_local);
 		
-		/*
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT  --o.*
-				--o.ORDER_ID
-				o.ORDER_NAME as pro_fr
-				--,o.ORIGINAL_NAME
-				--,o.PRODUCT_ID
-				--,o.CREATED_DATE as created_fr
-				--,o.CUSTOMER_ID
-				--,o.TIMETABLE_ID
-				--,o.STATUS as status_fr
-				--,o.FLOW_ID
-				--,o.LAST_IN_CUST
-				--,o.CHANGE_DATE
-				--,o.RECEIVED_DATE
-				--,o.*
-				,c.CUSTOMER_NAME as segment
-				,p.PRODUCT_NAME as material
-		        --,p.DESCRIPTION as color_desc
-		        --,p.PROD_TYPE_ID
-		        --,pt.PROD_TYPE_NAME
-		        --,pt.DESCRIPTION
-		        --pt.*
-		        --,od.[ORIG_DEL_DATE] as delivery_date_orig
-		        --,od.[DEL_DATE] as delivery_date
-		        ,od.DEL_QTY as qty
-		        --,l.*
-		        --,l.LC_NAME
-		        --,l.LC_ID
-		        --,ol.QTY_PROGRESS
-		        --,udf.*
-		        --,udf.UD_FIELD_VALUE
-		        --,pu.*
-		        --,pu.
-		        
-		        ,pu.UPDATE_QTY as conf_qty
-		        --,pu.PLAN_QTY
-		        --,s.*
-		        --,s.QUANTITY
-		        --,s.QTY_MADE
-		        --,s.STRIP_START
-		        --,s.STRIP_END
-		        ,pr.[ROW_NAME] as line
-		        ,pg.[GROUP_NAME] as line_group
-		        ,od.[DEL_DATE] as del_date
-		        
-		        
-		  FROM [FR_Gordon].[dbo].[_ORDERS] as o
-		  JOIN [FR_Gordon].[dbo].[_CUSTOMERS] as c ON c.[CUSTOMER_ID] = o.[CUSTOMER_ID]
-		  JOIN [FR_Gordon].[dbo].[_PRODUCTS] as p ON  p.PRODUCT_ID = o.PRODUCT_ID
-		  JOIN [FR_Gordon].[dbo].[_PROD_TYPES] as pt ON pt.PROD_TYPE_ID = p.PROD_TYPE_ID
-		  JOIN [FR_Gordon].[dbo].[_ORDER_DELIVERIES] as od ON od.ORDER_ID = o.ORDER_ID
-		  
-		  --JOIN [FR_Gordon].[dbo].[_STRIP_DATA] as s ON s.ORDER_ID = o.ORDER_ID
-		  --JOIN [FR_Gordon].[dbo].[_PLAN_ROWS] as pr ON pr.ROW_ID = s.ROW_ID -- for strip
-		  --JOIN [FR_Gordon].[dbo].[_PLAN_GROUPS] as pg ON pg.[GROUP_ID] = pr.[GROUP_ID] -- for strip
-		  
-		  --JOIN [FR_Gordon].[dbo].[_ORDER_LOADCENTRES] ol ON o.ORDER_ID = ol.ORDER_ID
-		  --JOIN [FR_Gordon].[dbo].[_LOADCENTRES] as l ON l.[LC_ID] = ol.[LC_ID] --AND LC_NAME = '400 Sewing out'				 --more lines
-		  
-		  --JOIN [FR_Gordon].[dbo].[_PLAN_UPDATES] as pu ON pu.ORDER_ID = o.ORDER_ID AND pu.ROW_ID = s.ROW_ID --for strip
-		  JOIN [FR_Gordon].[dbo].[_PLAN_UPDATES] as pu ON pu.ORDER_ID = o.ORDER_ID --AND pu.ROW_ID = pr.ROW_ID --for update
-		  JOIN [FR_Gordon].[dbo].[_PLAN_ROWS] as pr ON pr.ROW_ID = pu.ROW_ID -- for update
-		  JOIN [FR_Gordon].[dbo].[_PLAN_GROUPS] as pg ON pg.[GROUP_ID] = pr.[GROUP_ID] -- for update
-		  
-		  --JOIN [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] as udf ON o.ORDER_ID = udf.ORDER_ID  --more lines
-		  
-		  --WHERE o.ORDER_NAME like '%6818728%'
-		  --WHERE o.ORDER_ID = '6818862'
-		  WHERE  o.ORDER_NAME = '".$data_local[0]->pro_fr."' 	"));
-		  */
 		
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT  --o.*
+		$data = DB::connection('sqlsrv1')->select(DB::raw("SELECT  --o.*
 				--o.ORDER_ID
 				o.ORDER_NAME as pro_fr
 				--,o.ORIGINAL_NAME
@@ -1485,7 +1463,7 @@ class proController extends Controller {
 		
 		$data_local = DB::connection('sqlsrv')->select(DB::raw("SELECT pro_fr FROM pro WHERE id = '".$id."' "));
 
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT  --o.*
+		$data = DB::connection('sqlsrv1')->select(DB::raw("SELECT  --o.*
 		--o.ORDER_ID
 		o.ORDER_NAME as pro_fr
 		--,o.ORIGINAL_NAME
@@ -1561,7 +1539,7 @@ class proController extends Controller {
 		$data_local = DB::connection('sqlsrv')->select(DB::raw("SELECT pro FROM pro WHERE id = '".$id."' "));
 		// dd($data_local[0]->pro);
 
-		$data = DB::connection('sqlsrv')->select(DB::raw("SELECT a.[po]
+		$data = DB::connection('sqlsrv3')->select(DB::raw("SELECT a.[po]
 		      ,a.[fg]
 		      ,a.[activity]
 		      ,a.[wc]

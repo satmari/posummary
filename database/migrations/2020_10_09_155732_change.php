@@ -32,6 +32,7 @@ class Change extends Migration {
 
 			// $table->string('po_new')->nullable();
 			// $table->date('skeda_status_updated_at')->nullable();
+			// $table->date('target_date')->nullable();
 
 		});
 
@@ -69,6 +70,14 @@ class Change extends Migration {
 		Schema::table('coois_hes', function ($table) {
 
 			// $table->string('pro_status')->nullable();
+		});
+
+		Schema::table('future_orders', function ($table) {
+
+			// $table->string('status')->nullable();
+			// $table->string('main_mat')->nullable();
+
+			// $table->float('smv_fr')->nullable();
 		});
 
 	}

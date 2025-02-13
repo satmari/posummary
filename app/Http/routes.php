@@ -38,6 +38,40 @@ Route::get('/update_plo', 'ploController@update_plo');
 Route::get('/plo/edit/{id}', 'ploController@edit');
 Route::post('/edit_save_plo/{id}', 'ploController@edit_save');
 
+// Daily Plan
+
+Route::get('/daily_plan', 'daily_planController@index');
+Route::get('/daily_plan_all', 'daily_planController@index_all');
+Route::get('/import_daily_plan', 'daily_planController@import_daily_plan');
+Route::post('date_daily_plan', 'daily_planController@date_daily_plan');
+
+// MIS accounting
+
+Route::get('margin_analysis', 'margin_analysisController@index');
+Route::post('margin_analysis_post', 'margin_analysisController@margin_analysis_post');
+Route::post('post_margin_analysis', 'importController@post_margin_analysis');
+
+Route::get('plm_costing', 'margin_analysisController@plm_costing');
+Route::post('post_plm_costing', 'importController@post_plm_costing');
+
+// Future Orders
+Route::get('future_orders', 'future_orderController@index');
+Route::post('future_order_1', 'future_orderController@future_order_1');
+Route::post('portImportfuture_orders', 'importController@portImportfuture_orders');
+Route::get('future_order_status', 'future_orderController@future_order_status');
+Route::post('future_order_2', 'future_orderController@future_order_2');
+Route::get('future_order_update', 'future_orderController@future_order_update');
+Route::post('portUpdatefuture_orders', 'importController@portUpdatefuture_orders');
+
+
+// // BOM Cons
+// Route::get('bom_cons', 'margin_analysisController@bom_cons');
+// Route::post('bom_cons_post', 'importController@bom_cons_post');
+
+// // Bom cons ratio
+// Route::get('bom_cons_ratio', 'margin_analysisController@bom_cons_ratio');
+// Route::post('bom_cons_ratio_post', 'importController@bom_cons_ratio_post');
+
 
 // Import 
 Route::get('/import', 'importController@index');
@@ -45,6 +79,7 @@ Route::post('postImportPro', 'importController@postImportPro');
 Route::post('postImportPlo', 'importController@postImportPlo');
 Route::post('portImportSkedaStatus', 'importController@portImportSkedaStatus');
 Route::post('portImportNumberOfLines', 'importController@portImportNumberOfLines');
+Route::post('portImportdaily_plan', 'importController@portImportdaily_plan');
 
 // Import SAP
 Route::get('/import_sap', 'import_sapController@index');

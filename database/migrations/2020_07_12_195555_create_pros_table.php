@@ -80,6 +80,7 @@ class CreateProsTable extends Migration {
 			$table->string('po_new')->nullable();
 
 			$table->date('skeda_status_updated_at')->nullable();
+			$table->date('target_date')->nullable();
 			
 		});
 

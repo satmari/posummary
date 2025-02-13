@@ -50,6 +50,25 @@
 				<ul class="nav navbar-nav">
 					<li><a href="{{ url('/import_sap') }}">Import SAP</a></li>
 				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/daily_plan') }}">Daily plan</a></li>
+				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/future_orders') }}">Future orders</a></li>
+				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/margin_analysis') }}">Board</a></li>
+				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/plm_costing') }}">PLM costing</a></li>
+				</ul>
+				<!-- <ul class="nav navbar-nav">
+					<li><a href="{{ url('/bom_cons') }}">BOM cons</a></li>
+				</ul>
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url('/bom_cons_ratio') }}">BOM cons ratio</a></li>
+				</ul> -->
+				
 
 				<ul class="nav navbar-nav navbar-right">
 					@if (Auth::guest())
@@ -83,8 +102,8 @@
 	<script src="{{ asset('/js/bootstrap-table-export.js') }}" type="text/javascript" ></script>
 	<script src="{{ asset('/js/choosen.js') }}" type="text/javascript" ></script>
 
-	<script type="text/javascript">
-$(function() {
+<script type="text/javascript">
+	$(function() {
     	
 	$('#po').autocomplete({
 		minLength: 3,
@@ -122,7 +141,7 @@ $(function() {
 	$("#checkAll").click(function () {
     	$(".check").prop('checked', $(this).prop('checked'));
 	});
-});
+	});
 </script>
 
 <script type="text/javascript">

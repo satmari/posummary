@@ -15,7 +15,7 @@
 						<a href="{{url('/update_pro')}}" class="btn btn-default btn-info">Update PRO from FR</a>
                         
                         <!-- <a href="{{url('/update_pro_inteos')}}" class="btn btn-default btn-default" disabled>Insert PRO from Inteos</a> -->
-                        <a href="{{url('/update_pro_from_inteos')}}" class="btn btn-default btn-default" >Update PRO status from Inteos</a>
+                        <a href="{{url('/update_pro_from_inteos')}}" class="btn btn-default btn-default" >Update PRO from Inteos</a>
                         <a href="{{url('/update_destination')}}" class="btn btn-default btn-default" >Update Location</a>
 				               
                 @endif
@@ -80,6 +80,7 @@
                                 <th><span style="color:#00dcff">Status Inteos</span></th>
                                 <th><span style="color:blue">Qty</span></th>
                                 <th><span style="color:pink">Del date</span></th>
+                                <th><span style="color:pink">Target date</span></th>
                                 <!-- <th><span style="color:blue">Start date</span></th> -->
 
                                 <th><span style>Type</span></th>
@@ -121,6 +122,7 @@
                                 <td><span style="font-size: 10px;">{{ $req->status_int }}</span></td>
                                 <td><span style="font-size: 15px;">{{ $req->qty }}</span></td>
                                 <td><span style="font-size: 10px;">{{ substr($req->delivery_date,0,11) }}</span></td>
+                                <td><span style="font-size: 10px;">{{ substr($req->target_date,0,11) }}</span></td>
                                 
                                 <td><span style="font-size: 8px;">{{ $req->flash_type }}</span></td>
                                 

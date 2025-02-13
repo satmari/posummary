@@ -28,6 +28,11 @@
 						<input type="date" name="delivery_date" id="date" class="form-control" style="width: 100%; display: inline;" value="{{ date('Y-m-d', strtotime($pro->delivery_date))  }}">
 					</div>
 
+					<div class="panel-body">
+						<span>Target date (format: m/d/y):</span>
+						<input type="date" name="target_date" id="date" class="form-control" style="width: 100%; display: inline;" value="{{ date('Y-m-d', strtotime($pro->target_date))  }}">
+					</div>
+
 					<hr>
 
 					<div class="panel-body">
@@ -55,8 +60,8 @@
 					</div>
 
 					<div class="panel-body">
-						<span>TTP shippment: <span style="color:red;">*</span></span>
-						{!! Form::select('tpp_shipments', array(''=>'','OPEN'=>'OPEN','COMPLETE'=>'COMPLETE'), $pro->tpp_shipments, array('class' => 'form-control')); !!} 
+						<span>TPP shippment: <span style="color:red;">*</span></span>
+						{!! Form::select('tpp_shipments', array(''=>'','OPEN'=>'OPEN','COMPLETE'=>'COMPLETE','PARTIAL'=>'PARTIAL'), $pro->tpp_shipments, array('class' => 'form-control')); !!} 
 					</div>
 
 					<div class="panel-body">
