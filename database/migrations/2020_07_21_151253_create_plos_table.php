@@ -47,6 +47,9 @@ class CreatePlosTable extends Migration {
 			$table->string('routing')->nullable();
 			$table->string('prod_version')->nullable();
 
+			$table->string('sku')->nullable();
+			$table->string('deleted')->nullable();
+
 			$table->timestamps();
 		});
 	}

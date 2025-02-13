@@ -58,7 +58,7 @@
                             <tr>
                                 {{--<td>{{ $req->id }}</td>--}}
                                 <td>{{ $req->pro_fr }}</td>
-                                <td>{{ $req->material }}</td>
+                                <td></pre>{{ $req->material }}</pre></td>
                                 <td>{{ $req->segment }}</td>
                                 <td>{{ $req->qty }}</td>
                                 <td>{{ substr($req->line,3) }}</td>
