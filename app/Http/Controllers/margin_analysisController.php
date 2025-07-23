@@ -57,4 +57,20 @@ class margin_analysisController extends Controller {
 // 		return view('daily_plan.import_bom_cons_ratio');
 // 	}
 
+
+// PRO open closed
+	public function pro_open_closed_post(Request $request) {
+
+		// dd($request);
+
+		$input = $request->all();
+		$date1 = $input['date1'];
+		// dd($date);
+
+		return view('margin_analysis.pro_open_closed_import', compact('date1'));
+
+	}
+
+
+
 }

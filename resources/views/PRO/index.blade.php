@@ -12,11 +12,12 @@
 
                 @if (Auth::check() && Auth::user()->level() != 3)
 									
-						<a href="{{url('/update_pro')}}" class="btn btn-default btn-info">Update PRO from FR</a>
+						<a href="{{url('/update_pro')}}" class="btn btn-default btn-info">Insert/Update PROs from FR <i><small>(if exist in Inteos)</small></i></a>
+                        <a href="{{url('/update_pro_posum')}}" class="btn btn-default btn-info">Update DELETED status from FR</a>
                         
                         <!-- <a href="{{url('/update_pro_inteos')}}" class="btn btn-default btn-default" disabled>Insert PRO from Inteos</a> -->
-                        <a href="{{url('/update_pro_from_inteos')}}" class="btn btn-default btn-default" >Update PRO from Inteos</a>
-                        <a href="{{url('/update_destination')}}" class="btn btn-default btn-default" >Update Location</a>
+                        <a href="{{url('/update_pro_from_inteos')}}" class="btn btn-default btn-default" >Update PRO info from Inteos</a>
+                        <a href="{{url('/update_destination')}}" class="btn btn-default btn-default" >Update Location info</a>
 				               
                 @endif
                 </div>

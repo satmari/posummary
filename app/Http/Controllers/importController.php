@@ -17,6 +17,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\pro;
 use App\daily_plan;
 use App\margin_analysis;
+use App\pro_open_closed;
 use App\plm_costings;
 use App\future_orders;
 use App\bom_cons;
@@ -482,7 +483,7 @@ class importController extends Controller {
 		return redirect('/');
 	}
 
-	public function post_margin_analysis (Request $request) {
+	public function post_margin_analysis(Request $request) {
 		$getSheetName = Excel::load(Request::file('file6'))->getSheetNames();
 
 		// dd($request->request->get('import_date'));
@@ -617,6 +618,82 @@ class importController extends Controller {
 						$table->sales_min_tot = $sales_min_tot;
 						$table->sales_min_special_ord = $sales_min_special_ord;
 						$table->special_ord = $special_ord;
+
+						$table->save();
+	                }
+	            });
+	    }
+
+	    dd('Succesfuly imported,  (please close this page/tab because if you refresh it will import again) ');
+		// return redirect('/');
+	}
+
+	public function post_pro_open_closed (Request $request) {
+		$getSheetName = Excel::load(Request::file('file7'))->getSheetNames();
+
+		// dd($request->request->get('import_date'));
+		$import_date = Request::get('date');
+		// dd($import_date);
+		// dd(Request::all());
+
+		// $import_date = $request->input('import_date');
+		// dd($import_date);
+
+		// CHECK IF EXIST
+
+		// $sql = DB::connection('sqlsrv')->update(DB::raw("
+		// 		DELETE FROM [posummary].[dbo].[daily_plans]
+		// 		WHERE date = '".%date."'"));
+	    
+	    foreach($getSheetName as $sheetName)
+	    {
+	        //if ($sheetName === 'Product-General-Table')  {
+	    	//selectSheetsByIndex(0)
+	           	// DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+	            //DB::table('users')->truncate();
+	
+	            //Excel::selectSheets($sheetName)->load($request->file('file'), function ($reader)
+	            //Excel::selectSheets($sheetName)->load(Input::file('file'), function ($reader)
+	            //Excel::filter('chunk')->selectSheetsByIndex(0)->load(Request::file('file'))->chunk(50, function ($reader)
+	            Excel::filter('chunk')->selectSheets($sheetName)->load(Request::file('file7'))->chunk(10000, function ($reader)
+	            
+	            {
+	                $readerarray = $reader->toArray();
+	                // var_dump($readerarray);
+	                // $head = $reader->getHeading();
+	                // $head = $reader->first()->keys()->toArray();
+	                // dd($readerarray);
+
+	                foreach($readerarray as $row)
+	                {
+	                	
+						// if ($row['pro'] == '161699-000') {
+						// 	// dd($row['pro']);
+						// }
+
+						// dd($row);
+
+						$date = Request::get('date');
+
+						$pro_material = trim($row['pro_material']);
+						$budgeting_plant = trim($row['budgeting_plant']);
+
+						$qty_from_pro_open = (int)$row['qty_from_pro_open'];
+						$qty_from_pro_completedclosed = (int)$row['qty_from_pro_completedclosed'];
+						$qty_from_pro_total = (int)$row['qty_from_pro_total'];
+						$complclsd = (int)$row['complclsd'];
+						// dd('stop');
+
+
+						$table = new pro_open_closed;
+						$table->date = $date;
+
+						$table->pro_material = $pro_material;
+						$table->budgeting_plant = $budgeting_plant;
+
+						$table->qty_from_pro_open = $qty_from_pro_open;
+						$table->qty_from_pro_completedclosed = $qty_from_pro_completedclosed;
+						$table->qty_from_pro_total = $qty_from_pro_total;
 
 						$table->save();
 	                }

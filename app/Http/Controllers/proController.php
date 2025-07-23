@@ -479,9 +479,6 @@ class proController extends Controller {
 
 					$eur1 = trim($inteos[0]->eur1);
 					
-
-					
-
 				} else {
 					// var_dump('Not exist in Inteos');
 
@@ -701,6 +698,124 @@ class proController extends Controller {
 
 
 		// dd('q');
+
+		return Redirect::to('/pro');
+	}
+
+	public function update_pro_posum() {
+		$data_fr = DB::connection('sqlsrv1')->select(DB::raw("SELECT  --o.*
+				--o.ORDER_ID
+				o.ORDER_NAME as pro_fr
+				--,o.ORIGINAL_NAME
+				--,o.PRODUCT_ID
+				,o.CREATED_DATE as created_fr
+				--,o.CUSTOMER_ID
+				--,o.TIMETABLE_ID
+				,o.STATUS as status_fr
+				--,o.FLOW_ID
+				--,o.LAST_IN_CUST
+				--,o.CHANGE_DATE
+				--,o.RECEIVED_DATE
+				--,o.*
+				,c.CUSTOMER_NAME as segment
+				,p.PRODUCT_NAME as material
+		        ,p.DESCRIPTION as color_desc
+		        --,p.PROD_TYPE_ID
+		        ,pt.PROD_TYPE_NAME as prod_type
+		        --,pt.DESCRIPTION
+		        --pt.*
+		        ,od.ORIG_DEL_DATE as delivery_date_orig
+		        ,od.DEL_DATE as delivery_date
+		        ,od.DEL_QTY as qty
+		        --,l.*
+		        --,l.LC_NAME
+		        --,l.LC_ID
+		        --,ol.QTY_PROGRESS
+		        --,udf.*
+		        --,udf.UD_FIELD_VALUE
+		        --,pu.*
+		        --,pu.
+		        
+		        --,pu.UPDATE_QTY
+		        --,pu.PLAN_QTY
+		        --,s.*
+		        --,s.QUANTITY
+		        --,s.QTY_MADE
+		        --,s.STRIP_START
+		        --,s.STRIP_END
+		        --,pr.[ROW_NAME]
+		        --,pg.[GROUP_NAME]
+		        
+		        ,t.TIMETABLE_NAME as timetable_name
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '52') as pdm_bom
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '80') as pdm_bom_alt
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '85') as flash
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '17') as season
+		        ,(SELECT [UD_FIELD_VALUE] FROM [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] WHERE [ORDER_ID] = o.ORDER_ID AND [UD_FIELD_ID] = '48') as deleted
+		        ,(SELECT [ORDER_NAME] FROM [FR_Gordon].[dbo].[_ORDERS] WHERE [ORDER_ID] = o.[HOST_ORDER_ID] ) as plo_fr
+		        ,posum.pro as pro_posum
+				,posum.status_int
+		        -- ,inteos.pro as int_po
+		        -- ,inteos.[POClosed] as int_st
+
+		  FROM [FR_Gordon].[dbo].[_ORDERS] as o
+		  JOIN [FR_Gordon].[dbo].[_CUSTOMERS] as c ON c.CUSTOMER_ID = o.CUSTOMER_ID
+		  JOIN [FR_Gordon].[dbo].[_PRODUCTS] as p ON  p.PRODUCT_ID = o.PRODUCT_ID
+		  JOIN [FR_Gordon].[dbo].[_PROD_TYPES] as pt ON pt.PROD_TYPE_ID = p.PROD_TYPE_ID
+		  JOIN [FR_Gordon].[dbo].[_ORDER_DELIVERIES] as od ON od.ORDER_ID = o.ORDER_ID
+		  --JOIN [FR_Gordon].[dbo].[_ORDER_LOADCENTRES] ol ON o.ORDER_ID = ol.ORDER_ID
+		  --JOIN [FR_Gordon].[dbo].[_LOADCENTRES] as l ON l.[LC_ID] = ol.[LC_ID]					 --more lines
+		  --JOIN [FR_Gordon].[dbo].[_ORDER_USER_DEFINED_VALUES] as udf ON o.ORDER_ID = udf.ORDER_ID  --more lines
+		  
+		  --JOIN [FR_Gordon].[dbo].[_STRIP_DATA] as s ON s.ORDER_ID = o.ORDER_ID
+		  --JOIN [FR_Gordon].[dbo].[_PLAN_ROWS] as pr ON pr.ROW_ID = s.ROW_ID
+		  --JOIN [FR_Gordon].[dbo].[_PLAN_UPDATES] as pu ON pu.ORDER_ID = o.ORDER_ID --AND pu.ROW_ID = s.ROW_ID
+		  --JOIN [FR_Gordon].[dbo].[_PLAN_GROUPS] as pg ON pg.[GROUP_ID] = pr.[GROUP_ID]
+		  
+		  JOIN [FR_Gordon].[dbo].[_TIMETABLES] as t ON t.TIMETABLE_ID = o.TIMETABLE_ID
+
+		  JOIN [172.27.161.200].[posummary].[dbo].[pro] as posum ON posum.pro_fr = o.ORDER_NAME COLLATE Latin1_General_CI_AS 
+		  	and posum.status_int = 'Open'
+
+		 --  	JOIN (SELECT 
+			-- 	      SUBSTRING(su.[POnum], 4,9) as pro
+			-- 	      ,[POClosed]
+			-- 	FROM [SBT-SQLDB01P\INTEOS].[BdkCLZG].[dbo].[CNF_PO] as su
+			-- 	WHERE (su.[POClosed] = 0 OR su.[POClosed] is null) 
+
+			-- 	UNION   
+				  
+			-- 	SELECT 
+			-- 	      SUBSTRING(kik.[POnum], 4,9) as pro
+			-- 	      ,[POClosed]
+			-- 	FROM [SBT-SQLDB01P\INTEOSKKA].[BdkCLZKKA].[dbo].[CNF_PO] as kik
+			-- 	WHERE (kik.[POClosed] = 0 OR kik.[POClosed] is null) ) as inteos
+			-- ON inteos.pro = SUBSTRING(o.ORDER_NAME, 4,9) COLLATE Latin1_General_CI_AS
+		  
+
+		  WHERE o.ORDER_NAME like 'PRO%' AND p.PRODUCT_NAME != 'TEST1B   001 4B'
+
+		  --WHERE o.ORDER_NAME like 'PRO580640888::1::S/M'
+		  --WHERE o.ORDER_ID = '6818862' --OR o.ORDER_ID = '6768258'
+		  --WHERE o.CREATED_DATE >= Convert(datetime, '2020-05-01' ) AND ORDER_NAME like 'PRO%'
+		  --AND o.CREATED_DATE >= DATEADD(m, -1, GETDATE())
+		  
+		  Order by o.CREATED_DATE desc
+		  "));
+		
+		// dd($data_fr);
+		
+		for ($i=0; $i < count($data_fr); $i++) { 
+			
+			$pro_fr = $data_fr[$i]->pro_fr;
+			// UPDATE 
+			$sql = DB::connection('sqlsrv')->update(DB::raw("
+					UPDATE pro
+					SET 
+					deleted = '".$data_fr[$i]->deleted."'
+					WHERE pro_fr = '".$data_fr[$i]->pro_fr."' "));
+
+		}
 
 		return Redirect::to('/pro');
 	}

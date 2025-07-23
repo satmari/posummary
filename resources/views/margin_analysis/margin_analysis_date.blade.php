@@ -28,6 +28,33 @@
 					
 								
 			</div>
+
+			<br>
+			<div class="panel panel-default">
+				<div class="panel-heading">Import PRO open/closed</div>
+				<br>
+					{!! Form::open(['url' => 'pro_open_closed_post']) !!}
+
+					
+					<div class="panel-body">
+						<span>Please choose Date <br> (format is like mm/dd/yyyy):</span>
+						<br>
+						<br>
+						<input type="date" name="date1" id="date1" class="form-control" style="width: 100%; display: inline;" value="{{ date('Y-m-d')  }}">
+						{{-- {!! Form::text('date', null, ['class' => 'form-control']) !!} --}}
+
+					</div>
+					
+					<div class="panel-body">
+						{!! Form::submit('Next', ['class' => 'btn btn-success center-block']) !!}
+					</div>
+					@include('errors.list')
+					{!! Form::close() !!}
+
+					
+								
+			</div>
+
 		</div>
 	</div>
 </div>

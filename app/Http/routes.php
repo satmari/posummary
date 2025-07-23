@@ -20,9 +20,13 @@ Route::get('home', 'HomeController@index');
 Route::get('/pro', 'proController@index');
 Route::get('/pro_all', 'proController@index_all');
 Route::get('/update_pro', 'proController@update_pro');
+Route::get('/update_pro_posum', 'proController@update_pro_posum');
+
 Route::get('/update_pro_inteos', 'proController@update_pro_inteos');
 Route::get('/update_pro_from_inteos', 'proController@update_pro_from_inteos');
 Route::get('/update_destination', 'proController@update_destination');
+
+
 
 Route::get('/pro/edit/{id}', 'proController@edit');
 Route::post('/edit_save_pro/{id}', 'proController@edit_save');
@@ -50,6 +54,9 @@ Route::post('date_daily_plan', 'daily_planController@date_daily_plan');
 Route::get('margin_analysis', 'margin_analysisController@index');
 Route::post('margin_analysis_post', 'margin_analysisController@margin_analysis_post');
 Route::post('post_margin_analysis', 'importController@post_margin_analysis');
+
+Route::post('pro_open_closed_post', 'margin_analysisController@pro_open_closed_post');
+Route::post('post_pro_open_closed', 'importController@post_pro_open_closed');
 
 Route::get('plm_costing', 'margin_analysisController@plm_costing');
 Route::post('post_plm_costing', 'importController@post_plm_costing');
