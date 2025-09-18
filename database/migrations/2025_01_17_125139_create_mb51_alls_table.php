@@ -18,6 +18,8 @@ class CreateMb51AllsTable extends Migration {
 
 			$table->date('posting_date')->nullable();
 			$table->string('material_document')->nullable();
+			$table->string('material_document_item')->nullable();
+			$table->string('material_document_key')->unique();
 			$table->string('material')->nullable();
 			$table->string('storage_location')->nullable();
 			$table->string('movement_type')->nullable();
