@@ -278,6 +278,7 @@ class importController extends Controller {
 		return redirect('/');
 	}
 
+/*
 	public function portImportSkedaStatus(Request $request) {
 		$getSheetName = Excel::load(Request::file('file3'))->getSheetNames();
 	    
@@ -339,21 +340,181 @@ class importController extends Controller {
 
 						 		$sql = DB::connection('sqlsrv')->update(DB::raw("
 								 	UPDATE [posummary].[dbo].[pro]
-					 	  				SET skeda_status = '".$skeda_status."', skeda_status_updated_at = '".$date."'
+					 	  				SET skeda_status = '".$skeda_status."',
+					 	  					skeda_status_updated_at = '".$date."'
 					 	  			WHERE id = '".$id."' "));
-
 						 	}
-
 						}
-
-						
-
 	                }
 	            });
 	    }
 		return redirect('/');
 	}
-	
+*/
+
+/*
+	public function portImportSkedaStatus()
+	{
+	    // ✅ Use Input::file() properly
+	    $file = \Input::file('file3');
+
+	    if (empty($file)) {
+	        dd('No file uploaded (file3 not found in request).');
+	    }
+
+	    $getSheetName = \Excel::load($file)->getSheetNames();
+
+	    foreach ($getSheetName as $sheetName) {
+
+	        \Excel::filter('chunk')
+	            ->selectSheets($sheetName)
+	            ->load($file)
+	            ->chunk(1000, function ($reader) {
+
+	                $readerarray = $reader->toArray();
+
+	                foreach ($readerarray as $row) {
+
+	                    if (!isset($row['skeda'])) {
+	                        echo "<b style='color:red'>Skeda missing - please check your Excel file.</b><br>";
+	                        continue;
+	                    }
+
+	                    $skeda = $row['skeda'];
+	                    $skeda_status = isset($row['skedastatus']) ? $row['skedastatus'] : '';
+
+	                    $existing_skeda = DB::connection('sqlsrv')->select(DB::raw("
+	                        SELECT id, pro, skeda, skeda_status 
+	                        FROM pro 
+	                        WHERE skeda = '".$skeda."'
+	                    "));
+
+	                    $date = date('Y-m-d');
+
+	                    if (empty($existing_skeda)) {
+	                        echo "Skeda <b>{$skeda}</b> not found in database.<br>";
+	                        continue;
+	                    }
+
+	                    foreach ($existing_skeda as $line) {
+	                        $id = $line->id;
+	                        $existing_skeda_status = $line->skeda_status;
+	                        $pro = $line->pro;
+
+	                        if ($existing_skeda_status != $skeda_status) {
+	                            DB::connection('sqlsrv')->update(DB::raw("
+	                                UPDATE [posummary].[dbo].[pro]
+	                                SET skeda_status = '".$skeda_status."',
+	                                    skeda_status_updated_at = '".$date."'
+	                                WHERE id = '".$id."'
+	                            "));
+
+	                            echo "Updated PRO <b>{$pro}</b> - Skeda <b>{$skeda}</b> from '<i>{$existing_skeda_status}</i>' to '<i>{$skeda_status}</i>'<br>";
+	                        } else {
+	                            echo "No change for PRO <b>{$pro}</b> - Skeda <b>{$skeda}</b><br>";
+	                        }
+	                    }
+
+	                    // ✅ live output for each chunk
+	                    ob_flush();
+	                    flush();
+	                }
+	            });
+	    }
+
+	    echo "<hr><b>Import finished.</b>";
+	    exit;
+	}
+*/
+
+	public function portImportSkedaStatus()
+	{
+	    $file = \Input::file('file3');
+
+	    if (empty($file)) {
+	        dd('No file uploaded (file3 not found in request).');
+	    }
+
+	    // Initialize counters
+	    $updatedCount = 0;
+	    $notChangedCount = 0;
+	    $notFoundCount = 0;
+
+	    $getSheetName = \Excel::load($file)->getSheetNames();
+
+	    foreach ($getSheetName as $sheetName) {
+
+	        \Excel::filter('chunk')
+	            ->selectSheets($sheetName)
+	            ->load($file)
+	            ->chunk(1000, function ($reader) use (&$updatedCount, &$notChangedCount, &$notFoundCount) {
+
+	                $readerarray = $reader->toArray();
+
+	                foreach ($readerarray as $row) {
+
+	                    // ✅ Skip rows where 'skeda' is missing, empty, or only spaces
+	                    if (
+	                        !isset($row['skeda']) ||
+	                        trim($row['skeda']) === ''
+	                    ) {
+	                        continue;
+	                    }
+
+	                    $skeda = trim($row['skeda']);
+	                    $skeda_status = isset($row['skedastatus']) ? trim($row['skedastatus']) : '';
+
+	                    $existing_skeda = DB::connection('sqlsrv')->select(DB::raw("
+	                        SELECT id, pro, skeda, skeda_status 
+	                        FROM pro 
+	                        WHERE skeda = '".$skeda."'
+	                    "));
+
+	                    $date = date('Y-m-d');
+
+	                    if (empty($existing_skeda)) {
+	                        $notFoundCount++;
+	                        continue;
+	                    }
+
+	                    foreach ($existing_skeda as $line) {
+	                        $id = $line->id;
+	                        $pro = $line->pro;
+	                        $existing_skeda_status = $line->skeda_status;
+
+	                        if ($existing_skeda_status != $skeda_status) {
+	                            DB::connection('sqlsrv')->update(DB::raw("
+	                                UPDATE [posummary].[dbo].[pro]
+	                                SET skeda_status = '".$skeda_status."',
+	                                    skeda_status_updated_at = '".$date."'
+	                                WHERE id = '".$id."'
+	                            "));
+
+	                            $updatedCount++;
+
+	                            // ✅ Print only updated records
+	                            echo "Updated PRO <b>{$pro}</b> — Skeda <b>{$skeda}</b> set to '<i>{$skeda_status}</i>'<br>";
+
+	                            // live output flush
+	                            ob_flush();
+	                            flush();
+	                        } else {
+	                            $notChangedCount++;
+	                        }
+	                    }
+	                }
+	            });
+	    }
+
+	    echo "<hr>";
+	    echo "<b>Import finished.</b><br><br>";
+	    echo "Updated: <b>{$updatedCount}</b><br>";
+	    echo "No change: <b>{$notChangedCount}</b><br>";
+	    echo "Not found: <b>{$notFoundCount}</b><br>";
+
+	    exit;
+	}
+
 	public function portImportNumberOfLines (Request $request) {
 		$getSheetName = Excel::load(Request::file('file4'))->getSheetNames();
 	    

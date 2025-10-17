@@ -841,6 +841,8 @@ class proController extends Controller {
 					      ,[Approval] as approval
 					      ,[EUR1] as eur1
 					      ,[POClosed] as status_int
+					      ,[OrdQuant] as qty
+
 					FROM [BdkCLZG].[dbo].[CNF_PO]
 					WHERE POnum like '%".$pro."'
        			    UNION
@@ -850,6 +852,8 @@ class proController extends Controller {
 					      ,[Approval] as approval
 					      ,[EUR1] as eur1
 					      ,[POClosed] as status_int
+					      ,[OrdQuant] as qty
+
 					FROM [SBT-SQLDB01P\INTEOSKKA].[BdkCLZKKA].[dbo].[CNF_PO]
 					WHERE POnum like '%".$pro."' "));
 				// dd($inteos);
@@ -891,6 +895,7 @@ class proController extends Controller {
 					$tpp = trim($inteos[0]->tpp);
 					$approval = trim($inteos[0]->approval);
 					$eur1 = trim($inteos[0]->eur1);
+					$qty = trim($inteos[0]->qty);
 
 					// dd($status_int);
 					$sql = DB::connection('sqlsrv')->update(DB::raw("
@@ -899,7 +904,8 @@ class proController extends Controller {
 								[brand] = '".$brand."',
 								[tpp] = '".$tpp."',
 								[approval] = '".$approval."',
-								[eur1] = '".$eur1."'
+								[eur1] = '".$eur1."',
+								[qty] = '".$qty."'
 								
 							WHERE pro = '".$pro."'
 					"));
